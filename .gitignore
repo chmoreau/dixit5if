@@ -43,3 +43,12 @@ android/.idea/workspace.xml
 
 # Keystore files
 android/*.jks
+
+# Unity files
+Dixit/Library/
+Dixit/Temp/
+
+# C# projet files
+*.csproj
+*.unityproj
+*.sln
