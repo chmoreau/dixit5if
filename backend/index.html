@@ -30,6 +30,9 @@
       socket.on('queueSize', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
+      socket.on('test', function(msg){
+        $('#messages').append($('<li>DEBUG--').text(msg));
+      });
     </script>
   </body>
 </html>
