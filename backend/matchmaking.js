@@ -33,7 +33,7 @@ function connect(io) {
                     });
                 }, this);
 
-                io.in('test').emit('nique ta mère');
+                matchmaking.in('test').emit('test', 'nique ta mère');
             }
 
             // Send the new queue size to the users
