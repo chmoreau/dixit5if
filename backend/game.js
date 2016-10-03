@@ -1,6 +1,10 @@
+const NB_CARD = 20;
+const HAND_SIZE = 3;
+
 var numGame = 0;
 var Match = require('./models/Match.js');
 var Turn = require('./models/Turn.js');
+var Player = require('./models/Player.js');
 
 function Game(io, playerList) {
     this.io = io;
@@ -31,7 +35,9 @@ Game.prototype.listenPlayer = function(){
             });
             if(allPlayerReady(game.playerList)){
                 console.log('Everyone is ready');
-                game.match = new Match(numGame, game.playerList, [], new Turn());
+                game.match = createMatch(game.playerList);
+                initHands(game.match);
+                electNarrator(game.match);
             }
         });
 
@@ -42,18 +48,52 @@ Game.prototype.listenPlayer = function(){
     
 };
 
+function createMatch(playerList){
+    // init the stack, players and nbTurn
+    var stack = initStack(NB_CARD);
+    console.log(stack.toString());
+    var players = [];
+    playerList.forEach(function(element){
+        players.push(new Player(element.playerId));
+    }, this)
+    var match = new Match(numGame, players, stack, new Turn(), 1);
+    return match;
+}
+
+function initHands(match){
+    // init the hand of players -> use it at the start of a match
+    match.players.forEach(function(player){
+        var cards = [];
+        for(var i = 0; i < HAND_SIZE; i++){
+            cards.push(match.stack.pop());
+        }
+        player.hand = cards;
+    });
+    
+}
+
+function electNarrator(match){
+    // choose a narrator among the players
+    match.turn.narrator = match.players[(match.nbTurn-1)%(match.players.length)].id;
+}
+
+function initStack(stackSize){
+    var allCards = [];
+    for(var i = 0; i < NB_CARD; i++){
+        allCards[i] = i+1;
+    }
+    var stack = allCards.sort(function(){ return 0.5 - Math.random()}).slice(0, stackSize);
+    return stack;
+}
+
 function allPlayerReady(playerList){
     var ready = true;
     playerList.forEach(function(element) {
         if(element.ready !== true){
             ready = false;
         };
-    }, this);
+    });
     return ready;
 }
 
 module.exports = Game;
-
-/*
-
-*/
