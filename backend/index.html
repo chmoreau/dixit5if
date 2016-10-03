@@ -22,16 +22,20 @@
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var socket = io('/matchmaking');
+      var playerID;
       $('form').submit(function(){
         socket.emit('matchmaking request', $('#m').val());
+        playerID = $('#m').val();
         $('#m').val('');
         return false;
       });
       socket.on('queueSize', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
-      socket.on('test', function(msg){
-        $('#messages').append($('<li>DEBUG--').text(msg));
+      socket.on('game created', function(msg){
+        socket = io('/game/'+msg);
+        socket.emit('ready', playerID);
+        $('#messages').append($('<li>DEBUG--').text('room '+msg+' joined'));
       });
     </script>
   </body>

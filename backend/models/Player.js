@@ -1,8 +1,8 @@
-var Player = function () {};
+var Player = function Player(id, score, hand) {
+    this.id = id;
+    this.score = score;
+    this.hand = hand;
+};
 
-Player.prototype.id = {};
-Player.prototype.score = {};
-Player.prototype.hand = [];
-
-module.exports = new Player();
+module.exports = Player;
 

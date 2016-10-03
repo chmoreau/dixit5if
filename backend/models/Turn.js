@@ -1,12 +1,8 @@
-var Turn = function () {};
+function Turn(theme, narrator, trick) {
+    this.number = 1;
+    this.theme = theme;
+    this.narrator = narrator;
+    this.trick = trick;
+};
 
-Turn.prototype.number = {};
-Turn.prototype.theme = {};
-Turn.prototype.narrator = {};
-
-Turn.prototype.trick = new Array();
-for(var i = 0; i <3; i++){
-        Turn.prototype.trick[i] = new Array();
-    }
-
-module.exports = new Turn();
+module.exports = Turn;

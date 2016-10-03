@@ -1,11 +1,11 @@
-var player = require("./Player.js");
-var turn = require("./Turn.js");
+var Player = require("./Player.js");
+var Turn = require("./Turn.js");
 
-var Match = function () {};
+var Match = function Match(id, players, stack, turn) {
+    this.id = id;
+    this.players = players;
+    this.stack = stack;
+    this.turn = turn;
+};
 
-Match.prototype.id = {};
-Match.prototype.players = [];
-Match.prototype.stack = [];
-Match.prototype.turn = turn;
-
-module.exports = new Match();
+module.exports = Match;
