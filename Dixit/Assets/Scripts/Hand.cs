@@ -28,6 +28,7 @@ public class Hand : MonoBehaviour {
     private Deck m_Deck = null;
 
     private int m_SelectedCardIndex = -1;
+    private IEnumerator m_ZoomCoroutine = null;
 
     void Start()
     {
@@ -45,16 +46,23 @@ public class Hand : MonoBehaviour {
 
     public void FocusOnCard(int cardIndex)
     {
-        if (m_SelectedCardIndex == -1)
+        if (m_ZoomCoroutine == null && m_SelectedCardIndex == -1)
         {
-            m_SelectedCardIndex = cardIndex;
-            StartCoroutine("ZoomIn");
+            TransformAnimation.AnimationCallback onZoomInEnd = () => { m_SelectedCardIndex = cardIndex; m_ZoomCoroutine = null; };
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_HandAnchors[cardIndex].HandCard.gameObject, m_HandAnchors[cardIndex].HandAnchorPoint, m_ZoomTargetPoint, m_ZoomDuration, null, onZoomInEnd);
+            StartCoroutine(m_ZoomCoroutine);
         }
     }
 
     public void RestoreFocus()
     {
-        StartCoroutine("ZoomOut");        
+        if (m_ZoomCoroutine == null && m_SelectedCardIndex != -1)
+        {
+            TransformAnimation.AnimationCallback onZoomOutStart = () => { m_SelectedCardIndex = -1;};
+            TransformAnimation.AnimationCallback onZoomOutEnd = () => { m_ZoomCoroutine = null; };
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_HandAnchors[m_SelectedCardIndex].HandCard.gameObject, m_ZoomTargetPoint, m_HandAnchors[m_SelectedCardIndex].HandAnchorPoint, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
+            StartCoroutine(m_ZoomCoroutine);
+        }     
     }
 
     //bool isZoomingIn = false;

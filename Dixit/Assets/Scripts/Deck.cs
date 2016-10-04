@@ -22,22 +22,9 @@ public class Deck : MonoBehaviour {
 
 	public void Draw(string cardId, int handIndex)
     {
-        IEnumerator drawCoroutine = DrawCardToHand(cardId, handIndex);
+        Card card = Instantiate(m_CardPrefab, m_CardSpawnPoint.position, m_CardSpawnPoint.rotation) as Card;
+        TransformAnimation.AnimationCallback onDrawEnd = () => { m_Hand.HandAnchors[handIndex].HandCard = card; };
+        IEnumerator drawCoroutine = TransformAnimation.FromToAnimation(card.gameObject, m_CardSpawnPoint, m_Hand.HandAnchors[handIndex].HandAnchorPoint, m_DrawCardDuration, null, onDrawEnd);// DrawCardToHand(cardId, handIndex);
         StartCoroutine(drawCoroutine);
-    }
-
-    IEnumerator DrawCardToHand(string cardId, int handIndex)
-    {
-        Card card = Instantiate(m_CardPrefab, m_CardSpawnPoint.position, m_CardSpawnPoint.rotation) as Card;        
-        float timer = m_DrawCardDuration;
-        while (timer >= 0)
-        {
-            timer -= Time.deltaTime;
-            float process = (m_DrawCardDuration - timer) / m_DrawCardDuration;
-            card.transform.position = Vector3.Lerp(m_CardSpawnPoint.position, m_Hand.HandAnchors[handIndex].HandAnchorPoint.position, process);
-            card.transform.rotation = Quaternion.Slerp(m_CardSpawnPoint.rotation, m_Hand.HandAnchors[handIndex].HandAnchorPoint.rotation, process);
-            yield return new WaitForEndOfFrame();
-        }
-        m_Hand.HandAnchors[handIndex].HandCard = card;
     }
 }
