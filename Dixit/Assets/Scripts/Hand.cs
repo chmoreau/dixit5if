@@ -16,28 +16,47 @@ public class Hand : MonoBehaviour {
     }
 
     [SerializeField]
-    private HandAnchor[] m_HandAnchors = new HandAnchor[6];
-    public HandAnchor[] HandAnchors { get { return m_HandAnchors; } }
+    private CardSlot[] m_CardSlots = new CardSlot[6];
+    public CardSlot[] CardSlots { get { return m_CardSlots; } }
     [SerializeField]
     private Transform m_ZoomTargetPoint = null;
     [SerializeField]
     private float m_ZoomDuration = 0.5f;
+    [SerializeField]
+    private float m_PlayDuration = 0.5f;
 
     [Header("Test")]
     [SerializeField]
     private Deck m_Deck = null;
+    [SerializeField]
+    private Table m_Table = null;
 
     private int m_SelectedCardIndex = -1;
+    private bool m_IsInteractable = false;
     private IEnumerator m_ZoomCoroutine = null;
 
     void Start()
     {
+        Init();
         StartCoroutine("DrawInitHand");
+    }
+
+    public void Init()
+    {
+        m_IsInteractable = true;
+    }
+
+    public void Reset()
+    {
+        foreach (CardSlot slot in m_CardSlots)
+        {
+            slot.gameObject.SetActive(true);
+        }
     }
 
     IEnumerator DrawInitHand()
     {
-        for (int i = 0; i < m_HandAnchors.Length; i++)
+        for (int i = 0; i < m_CardSlots.Length; i++)
         {
             m_Deck.Draw(string.Empty, i);
             yield return new WaitForSeconds(0.8f);
@@ -46,53 +65,62 @@ public class Hand : MonoBehaviour {
 
     public void FocusOnCard(int cardIndex)
     {
+        if (!m_IsInteractable) { return; }
+
         if (m_ZoomCoroutine == null && m_SelectedCardIndex == -1)
         {
-            TransformAnimation.AnimationCallback onZoomInEnd = () => { m_SelectedCardIndex = cardIndex; m_ZoomCoroutine = null; };
-            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_HandAnchors[cardIndex].HandCard.gameObject, m_HandAnchors[cardIndex].HandAnchorPoint, m_ZoomTargetPoint, m_ZoomDuration, null, onZoomInEnd);
+            TransformAnimation.AnimationCallback onZoomInStart = () => { };
+            TransformAnimation.AnimationCallback onZoomInEnd = () => {
+                m_SelectedCardIndex = cardIndex;
+                m_ZoomCoroutine = null;
+            };
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[cardIndex].Card.gameObject, m_CardSlots[cardIndex].FaceUpAnchor, m_ZoomTargetPoint, m_ZoomDuration, onZoomInStart, onZoomInEnd);
             StartCoroutine(m_ZoomCoroutine);
         }
     }
 
     public void RestoreFocus()
     {
+        if (!m_IsInteractable) { return; }
+
         if (m_ZoomCoroutine == null && m_SelectedCardIndex != -1)
         {
-            TransformAnimation.AnimationCallback onZoomOutStart = () => { m_SelectedCardIndex = -1;};
-            TransformAnimation.AnimationCallback onZoomOutEnd = () => { m_ZoomCoroutine = null; };
-            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_HandAnchors[m_SelectedCardIndex].HandCard.gameObject, m_ZoomTargetPoint, m_HandAnchors[m_SelectedCardIndex].HandAnchorPoint, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
+            TransformAnimation.AnimationCallback onZoomOutStart = () => {
+                m_SelectedCardIndex = -1;
+            };
+            TransformAnimation.AnimationCallback onZoomOutEnd = () => 
+            {
+                m_ZoomCoroutine = null;
+            };
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
             StartCoroutine(m_ZoomCoroutine);
         }     
     }
 
-    //bool isZoomingIn = false;
-    IEnumerator ZoomIn()
+    public void PlayCard()
     {
-        //isZoomingIn = true;
-        float timer = m_ZoomDuration;
-        while (timer >= 0)
-        {
-            timer -= Time.deltaTime;
-            float process = (m_ZoomDuration - timer) / m_ZoomDuration;
-            m_HandAnchors[m_SelectedCardIndex].HandCard.transform.position = Vector3.Lerp(m_HandAnchors[m_SelectedCardIndex].HandAnchorPoint.position, m_ZoomTargetPoint.position, process);
-            //card.transform.rotation = Quaternion.Slerp(m_CardSpawnPoint.rotation, m_ZoomTargetPoint.rotation, process);
-            yield return new WaitForEndOfFrame();
-        }
-        //isZoomingIn = false;
-    }
+        if (!m_IsInteractable) { return; }
+        if (m_ZoomCoroutine != null || m_SelectedCardIndex == -1) { return; }
 
-    //bool isZoomingO
-    IEnumerator ZoomOut()
-    {
-        float timer = m_ZoomDuration;
-        while (timer >= 0)
+        CardSlot targetSlot = m_Table.AllocateSlot();
+        if (targetSlot != null)
         {
-            timer -= Time.deltaTime;
-            float process = (m_ZoomDuration - timer) / m_ZoomDuration;
-            m_HandAnchors[m_SelectedCardIndex].HandCard.transform.position = Vector3.Lerp(m_ZoomTargetPoint.position, m_HandAnchors[m_SelectedCardIndex].HandAnchorPoint.position, process);
-            //card.transform.rotation = Quaternion.Slerp(m_CardSpawnPoint.rotation, m_ZoomTargetPoint.rotation, process);
-            yield return new WaitForEndOfFrame();
+            //m_IsInteractable = false;
+            TransformAnimation.AnimationCallback onPlayStart = () => 
+            {
+                m_CardSlots[m_SelectedCardIndex].Card.transform.SetParent(null);
+                m_CardSlots[m_SelectedCardIndex].gameObject.SetActive(false);
+            };
+            TransformAnimation.AnimationCallback onPlayEnd = () => 
+            {
+                targetSlot.Card = m_CardSlots[m_SelectedCardIndex].Card;
+                targetSlot.Card.transform.SetParent(targetSlot.transform);
+                m_CardSlots[m_SelectedCardIndex].Card = null;
+                m_SelectedCardIndex = -1;
+            };
+            IEnumerator playCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, targetSlot.FaceDownAnchor, m_PlayDuration, onPlayStart, onPlayEnd);
+            StartCoroutine(playCoroutine);
         }
-        m_SelectedCardIndex = -1;
+        
     }
 }

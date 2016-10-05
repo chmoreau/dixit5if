@@ -23,8 +23,12 @@ public class Deck : MonoBehaviour {
 	public void Draw(string cardId, int handIndex)
     {
         Card card = Instantiate(m_CardPrefab, m_CardSpawnPoint.position, m_CardSpawnPoint.rotation) as Card;
-        TransformAnimation.AnimationCallback onDrawEnd = () => { m_Hand.HandAnchors[handIndex].HandCard = card; };
-        IEnumerator drawCoroutine = TransformAnimation.FromToAnimation(card.gameObject, m_CardSpawnPoint, m_Hand.HandAnchors[handIndex].HandAnchorPoint, m_DrawCardDuration, null, onDrawEnd);// DrawCardToHand(cardId, handIndex);
+        TransformAnimation.AnimationCallback onDrawEnd = () => 
+        {
+            m_Hand.CardSlots[handIndex].Card = card;
+            m_Hand.CardSlots[handIndex].Card.transform.SetParent(m_Hand.CardSlots[handIndex].transform);
+        };
+        IEnumerator drawCoroutine = TransformAnimation.FromToAnimation(card.gameObject, m_CardSpawnPoint, m_Hand.CardSlots[handIndex].FaceUpAnchor, m_DrawCardDuration, null, onDrawEnd);
         StartCoroutine(drawCoroutine);
     }
 }
