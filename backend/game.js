@@ -11,15 +11,14 @@ function Game(io, playerList) {
     this.playerList = playerList;
     this.id = ++numGame;
     this.room = io.of('/game/'+ this.id);
+    this.match = {};
     console.log('Game ' + this.id + ' created');
     this.listenPlayer();
 };
 
 Game.prototype.joinRoom = function(){
     this.playerList.forEach(function(element) {
-        element.socket.join('/game/'+numGame, function(err) {
-            console.log(err + " " + element.playerId);
-        });
+        element.socket.join('/game/'+numGame);
     }, this);
 };
 
@@ -38,9 +37,32 @@ Game.prototype.listenPlayer = function(){
                 game.match = createMatch(game.playerList);
                 initHands(game.match);
                 electNarrator(game.match);
+                console.log('Init match done');
+                sendStartTurn(game);
             }
         });
-
+        socket.on('submit theme', function(theme){
+            console.log('narrator theme received');
+            match.turn.theme = theme;
+            sendNarratorTheme(theme);
+        });
+        socket.on('play card', function(data){ //TODO : remove card from player's hand
+            var playerID = data.playerID;
+            var cardID = data.cardID;
+            var match = game.match;
+            console.log('player ' + playerID + ' played the card ' + cardID);
+            match.players.find(function(element, index, array) {
+                if(element.playerId === playerID){
+                    var trick = match.turn.trick;
+                    for(var i = 0; i < trick.length; i++){
+                        if(trick[i][0] !== undefined){
+                            trick[i][0] = playerID;
+                            trick[i][1] = cardID;
+                        }
+                    }
+                };
+            });
+        });
         socket.on('disconnect', function(socket){
             //TODO
         });
@@ -48,16 +70,38 @@ Game.prototype.listenPlayer = function(){
     
 };
 
+function allPlayerReady(playerList){
+    var ready = true;
+    playerList.forEach(function(element) {
+        if(element.ready !== true){
+            ready = false;
+        };
+    });
+    return ready;
+}
+
 function createMatch(playerList){
-    // init the stack, players and nbTurn
+    //init nbTurn
+    var nbTurn = 1;
+    // init the stack
     var stack = initStack(NB_CARD);
     console.log(stack.toString());
+    // init players
     var players = [];
     playerList.forEach(function(element){
-        players.push(new Player(element.playerId));
+        players.push(new Player(element.playerId, 0));
     }, this)
-    var match = new Match(numGame, players, stack, new Turn(), 1);
+    var match = new Match(numGame, players, stack, new Turn(), nbTurn);
     return match;
+}
+
+function initStack(stackSize){
+    var allCards = [];
+    for(var i = 0; i < NB_CARD; i++){
+        allCards[i] = i+1;
+    }
+    var stack = allCards.sort(function(){ return 0.5 - Math.random()}).slice(0, stackSize);
+    return stack;
 }
 
 function initHands(match){
@@ -77,23 +121,27 @@ function electNarrator(match){
     match.turn.narrator = match.players[(match.nbTurn-1)%(match.players.length)].id;
 }
 
-function initStack(stackSize){
-    var allCards = [];
-    for(var i = 0; i < NB_CARD; i++){
-        allCards[i] = i+1;
-    }
-    var stack = allCards.sort(function(){ return 0.5 - Math.random()}).slice(0, stackSize);
-    return stack;
+function sendStartTurn(game){
+    // Sending players' infos (score, hand, id = username) and the narrator id
+    game.playerList.forEach(function(playerInfo){
+        var socket = playerInfo.socket;
+        var newTurn = game.match.players.find(function(element, index, array) {
+            return playerInfo.playerId === element.id;
+        });
+        newTurn.narrator = game.match.turn.narrator;
+        socket.emit('new turn', newTurn); //TODO adapt with the protocol
+
+    })
+    console.log('start turn information sent');
 }
 
-function allPlayerReady(playerList){
-    var ready = true;
-    playerList.forEach(function(element) {
-        if(element.ready !== true){
-            ready = false;
-        };
-    });
-    return ready;
+function sendNarratorTheme(theme){
+    game.playerList.forEach(function(playerInfo){
+        var socket = playerInfo.socket;
+        socket.emit('narrator theme', theme); //TODO adapt with the protocol
+
+    })
+    console.log('Narrator theme broadcasted');
 }
 
 module.exports = Game;
