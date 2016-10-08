@@ -7,31 +7,69 @@ public class Table : MonoBehaviour {
     private RectTransform m_CardSlotPanel = null;
     [SerializeField]
     private CardSlot m_CardSlotPrefab = null;
-    //[SerializeField]
-    //private Transform m_CardSpawnPoint = null;
+    [Header("Animations")]
     [SerializeField]
-    private float m_DrawCardDuration = 1.0f;
+    private float m_ShuffleDuration = 1.0f;
+    [SerializeField]
+    private float m_ShuffleInterval = 0.8f;
+    [SerializeField]
+    private float m_ShufflePause = 0.3f;
+    [SerializeField]
+    private float m_DisplayDuration = 1.0f;
+    [SerializeField]
+    private float m_DisplayInterval = 0.8f;
+    [SerializeField]
+    private float m_ReturnDuration = 1.0f;
+
+    [SerializeField]
+    private float m_ZoomDuration = 0.5f;
+    [Header("Anchors")]
+    [SerializeField]
+    private Transform m_ShuffleSpotPoint = null;
+    [SerializeField]
+    private Transform m_DisplayTargetPoint = null;
     [Header("Test")]
-    //[SerializeField]
-    //private Hand m_Hand = null;
+    [SerializeField]
+    private Deck m_Deck = null;
     
     private CardSlot[] m_CardSlots = new CardSlot[0];
     //public CardSlot[] CardSlots { get { return m_CardSlots; } }
     private int m_SlotPointer = 0;
 
+    private int m_SelectedCardIndex = -1;
+    private bool m_IsInteractable = false;
+    private IEnumerator m_ZoomCoroutine = null;
+
     void Start()
     {
-        Init(6);
+        string[] initCardIds = new string[6];
+        Init(6, initCardIds, false);
+
+        string[] shuffledCardIds = { "1", "2", "3", "5", "4", "6" };
+        StartCoroutine(ShuffleAndDisplayCards(shuffledCardIds));
     }
 
-    public void Init(int slotNumber)
+    public void Init(int slotNumber, string[] cardIds = null, bool isFaceUp = false, bool isInteractable = false)
     {
         m_CardSlots = new CardSlot[slotNumber];
+        if (cardIds == null)
+        {
+            cardIds = new string[0];
+        }
         for (int i = 0; i < slotNumber; i++)
         {
             m_CardSlots[i] = Instantiate(m_CardSlotPrefab, m_CardSlotPanel, false) as CardSlot;
+            if (i < cardIds.Length)
+            {
+                m_CardSlots[i].Card = m_Deck.FetchAndInstantiateCard(isFaceUp ? m_CardSlots[i].FaceUpAnchor : m_CardSlots[i].FaceDownAnchor, cardIds[i]);
+                m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
+            }
+            int k = i;
+            m_CardSlots[i].Clickable.onClick.AddListener(() => { FocusOnCard(k); });
         }
-        m_SlotPointer = 0;
+        m_SlotPointer = cardIds.Length;
+
+        m_IsInteractable = isInteractable;
     }
 
     public void Reset()
@@ -48,6 +86,72 @@ public class Table : MonoBehaviour {
         else
         {
             return null;
+        }
+    }
+
+    public IEnumerator ShuffleAndDisplayCards(string[] cardIds)
+    {
+        for (int i = 0; i < cardIds.Length; i++)
+        {
+            m_CardSlots[i].Card.LoadModel(m_Deck.FetchCardModel(cardIds[i]));
+            IEnumerator shuffleCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[i].Card.gameObject, m_CardSlots[i].FaceDownAnchor, m_ShuffleSpotPoint, Vector3.zero, Vector3.zero, m_ShuffleDuration, null, null);
+            StartCoroutine(shuffleCoroutine);
+            yield return new WaitForSeconds(m_ShuffleInterval);
+        }
+        yield return new WaitForSeconds(m_ShufflePause);
+        for (int i = 0; i < cardIds.Length; i++)
+        {
+            TransformAnimation.AnimationCallback onDisplayEnd = CreateReturnCoroutine(i);
+            IEnumerator displayCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[i].Card.gameObject, m_ShuffleSpotPoint, m_DisplayTargetPoint, Vector3.zero, Vector3.zero, m_DisplayDuration, null, onDisplayEnd);
+            StartCoroutine(displayCoroutine);
+            yield return new WaitForSeconds(m_DisplayInterval);
+        }
+
+        m_IsInteractable = true;
+    }
+
+    // Out of the coroutine body to avoid the scope issue :( 
+    private TransformAnimation.AnimationCallback CreateReturnCoroutine(int slotIndex)
+    {
+        return () =>
+        {
+            IEnumerator returnCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[slotIndex].Card.gameObject, m_DisplayTargetPoint, m_CardSlots[slotIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ReturnDuration, null, null);
+            StartCoroutine(returnCoroutine);
+        };
+    }
+
+    public void FocusOnCard(int slotIndex)
+    {
+        if (!m_IsInteractable) { return; }
+        if (!m_CardSlots[slotIndex].Card) { return; }
+
+        if (m_ZoomCoroutine == null && m_SelectedCardIndex == -1)
+        {
+            TransformAnimation.AnimationCallback onZoomInStart = () => { };
+            TransformAnimation.AnimationCallback onZoomInEnd = () => {
+                m_SelectedCardIndex = slotIndex;
+                m_ZoomCoroutine = null;
+            };
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[slotIndex].Card.gameObject, m_CardSlots[slotIndex].FaceUpAnchor, m_DisplayTargetPoint, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomInStart, onZoomInEnd);
+            StartCoroutine(m_ZoomCoroutine);
+        }
+    }
+
+    public void RestoreFocus()
+    {
+        if (!m_IsInteractable) { return; }
+
+        if (m_ZoomCoroutine == null && m_SelectedCardIndex != -1)
+        {
+            TransformAnimation.AnimationCallback onZoomOutStart = () => {
+                m_SelectedCardIndex = -1;
+            };
+            TransformAnimation.AnimationCallback onZoomOutEnd = () =>
+            {
+                m_ZoomCoroutine = null;
+            };
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_DisplayTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
+            StartCoroutine(m_ZoomCoroutine);
         }
     }
 }

@@ -58,7 +58,7 @@ public class Hand : MonoBehaviour {
     {
         for (int i = 0; i < m_CardSlots.Length; i++)
         {
-            m_Deck.Draw(string.Empty, i);
+            m_Deck.DrawCard(string.Empty, i);
             yield return new WaitForSeconds(0.8f);
         }
     }
@@ -66,6 +66,7 @@ public class Hand : MonoBehaviour {
     public void FocusOnCard(int cardIndex)
     {
         if (!m_IsInteractable) { return; }
+        if (!m_CardSlots[cardIndex].Card) { return; }
 
         if (m_ZoomCoroutine == null && m_SelectedCardIndex == -1)
         {
@@ -74,7 +75,7 @@ public class Hand : MonoBehaviour {
                 m_SelectedCardIndex = cardIndex;
                 m_ZoomCoroutine = null;
             };
-            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[cardIndex].Card.gameObject, m_CardSlots[cardIndex].FaceUpAnchor, m_ZoomTargetPoint, m_ZoomDuration, onZoomInStart, onZoomInEnd);
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[cardIndex].Card.gameObject, m_CardSlots[cardIndex].FaceUpAnchor, m_ZoomTargetPoint, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomInStart, onZoomInEnd);
             StartCoroutine(m_ZoomCoroutine);
         }
     }
@@ -92,7 +93,7 @@ public class Hand : MonoBehaviour {
             {
                 m_ZoomCoroutine = null;
             };
-            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
+            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
             StartCoroutine(m_ZoomCoroutine);
         }     
     }
@@ -118,7 +119,7 @@ public class Hand : MonoBehaviour {
                 m_CardSlots[m_SelectedCardIndex].Card = null;
                 m_SelectedCardIndex = -1;
             };
-            IEnumerator playCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, targetSlot.FaceDownAnchor, m_PlayDuration, onPlayStart, onPlayEnd);
+            IEnumerator playCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, targetSlot.FaceDownAnchor, Vector3.zero, Vector3.zero, m_PlayDuration, onPlayStart, onPlayEnd);
             StartCoroutine(playCoroutine);
         }
         

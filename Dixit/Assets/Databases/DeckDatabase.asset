@@ -11,6 +11,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e62f85601dbfbf24da0f270c528f90bc, type: 3}
   m_Name: DeckDatabase
   m_EditorClassIdentifier: 
+  m_DefaultCard:
+    m_CardId: default
+    m_CardImage: {fileID: 2800000, guid: 269af002511dd754eb58663a8efa7174, type: 3}
   m_AllCards:
   - m_CardId: 1
     m_CardImage: {fileID: 2800000, guid: 4f1f3a5a47fdccf4095195d16c0e4650, type: 3}
