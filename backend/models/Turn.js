@@ -1,12 +1,10 @@
-var Turn = function () {};
-
-Turn.prototype.number = {};
-Turn.prototype.theme = {};
-Turn.prototype.narrator = {};
-
-Turn.prototype.trick = new Array();
-for(var i = 0; i <3; i++){
-        Turn.prototype.trick[i] = new Array();
+function Turn() {
+    this.theme = {};
+    this.narrator = {};
+    this.trick = [];
+    for(var i = 0; i < 3; i++){
+        this.trick[i] = [];
     }
+};
 
-module.exports = new Turn();
+module.exports = Turn;

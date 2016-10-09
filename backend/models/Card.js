@@ -1,5 +1,5 @@
-var Card = function () {};
+function Card(id) {
+    this.id = id;
+};
 
-Card.prototype.id = {};
-
-module.exports = new Card();
+module.exports = Card;

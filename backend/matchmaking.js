@@ -1,6 +1,8 @@
-const SESSION_SIZE = 5;
+const SESSION_SIZE = 2;
 const MATCHMAKING_REQUEST = "matchmaking request";
 const QUEUE_SIZE = "queueSize"
+
+var Game = require('./game.js');
 
 // FIFO that represents the players that are waiting for a match
 var queue = [];
@@ -27,13 +29,12 @@ function connect(io) {
                 console.log("Created match with players : " + playerList.toString());
 
                 // TODO notify the relevant players
+                var game = new Game(io, playerList);
                 playerList.forEach(function(element) {
-                    socket.join("test", function(err) {
-                        console.log(err + " " + element.playerId);
-                    });
+                    element.socket.join("lobby"+game.id);
                 }, this);
 
-                matchmaking.in('test').emit('test', 'nique ta mère');
+                matchmaking.in("lobby"+game.id).emit('game created', game.id);
             }
 
             // Send the new queue size to the users
@@ -46,11 +47,7 @@ function connect(io) {
                 return socket.id === element.socket.id;
             });
 
-            if (discPlayer === undefined) {
-                // Player is not is the queue, so he probably was assigned to a game
-                console.log('A player has left before the game started!');
-            }
-            else {
+            if (discPlayer !== undefined) {
                 // Remove the player from the queue
                 queue.splice(queue.indexOf(discPlayer, 0), 1);
                 console.log(discPlayer.playerId + ' has left matchmaking');
