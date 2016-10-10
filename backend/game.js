@@ -30,6 +30,7 @@ Game.prototype.listenPlayer = function(){
             console.log('player ' + playerID + ' is ready');
             game.playerList.find(function(element, index, array) {
                 if(element.playerId === playerID){
+                    element.socket = socket;
                     element.ready = true;
                 };
             });
@@ -51,11 +52,16 @@ Game.prototype.listenPlayer = function(){
             match.turn.theme = theme;
             sendNarratorTheme(theme);
         });
+
+       /* socket.once('resTest', function(msg) {
+            console.log(msg);
+        });*/
+
         socket.on('card played', function(data){ //TODO : remove card from player's hand
 
             var yop = new IOPlayer(game.room, game.playerList);
-            yop.sendToPlayer(game.playerList[0].playerId, 'test', 'testcontent', 'resTest', function(res){
-                console.log(res);
+            yop.sendToAll('DEBUG', 'testcontent', 'DEBUG', function(playerId, res){
+                console.log(playerId+" response: "+res);
             });
 
             var playerID = data.playerID;

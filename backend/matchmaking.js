@@ -41,6 +41,7 @@ function connect(io) {
             matchmaking.emit(QUEUE_SIZE, queue.length);
 
         });
+
         socket.on('disconnect', function() {
             // Find the disconnected player from his socket id
             var discPlayer = queue.find(function(element, index, array) {

@@ -36,12 +36,14 @@
       });
       socket.on('game created', function(msg){
         socket = io('/game/'+msg);
+
+        socket.on('DEBUG', function(msg){
+          $('#messages').append($('<li>').text('DEBUG MSG: '+msg));
+          socket.emit('DEBUG', 'DEBUG REPLY');
+        });
+
         socket.emit('ready', playerID);
-        $('#messages').append($('<li>DEBUG--').text('room '+msg+' joined'));
-      });
-      socket.on('test', function(msg){
-        $('#messages').append($('<li>DEBUG--').text('test ioPlayer'));
-        socket.emit('resTest', 'resTestContent');
+        $('#messages').append($('<li>').text('room '+msg+' joined'));
       });
       socket.on('new turn', function(msg){
         $('#messages').append($('<li>').text(msg));
