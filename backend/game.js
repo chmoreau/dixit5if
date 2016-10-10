@@ -5,6 +5,7 @@ var numGame = 0;
 var Match = require('./models/Match.js');
 var Turn = require('./models/Turn.js');
 var Player = require('./models/Player.js');
+var IOPlayer = require('./ioPlayers.js');
 
 function Game(io, playerList) {
     this.io = io;
@@ -41,12 +42,22 @@ Game.prototype.listenPlayer = function(){
                 sendStartTurn(game);
             }
         });
+        socket.on('disconnect', function(socket){
+            //TODO
+        });
+
         socket.on('submit theme', function(theme){
             console.log('narrator theme received');
             match.turn.theme = theme;
             sendNarratorTheme(theme);
         });
-        socket.on('play card', function(data){ //TODO : remove card from player's hand
+        socket.on('card played', function(data){ //TODO : remove card from player's hand
+
+            var yop = new IOPlayer(game.room, game.playerList);
+            yop.sendToPlayer(game.playerList[0].playerId, 'test', 'testcontent', 'resTest', function(res){
+                console.log(res);
+            });
+
             var playerID = data.playerID;
             var cardID = data.cardID;
             var match = game.match;
@@ -63,9 +74,7 @@ Game.prototype.listenPlayer = function(){
                 };
             });
         });
-        socket.on('disconnect', function(socket){
-            //TODO
-        });
+
     });
     
 };

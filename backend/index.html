@@ -34,12 +34,15 @@
       socket.on('queueSize', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
-      socket.on('play card', function(msg){
+      socket.on('game created', function(msg){
         socket = io('/game/'+msg);
         socket.emit('ready', playerID);
         $('#messages').append($('<li>DEBUG--').text('room '+msg+' joined'));
       });
-
+      socket.on('test', function(msg){
+        $('#messages').append($('<li>DEBUG--').text('test ioPlayer'));
+        socket.emit('resTest', 'resTestContent');
+      });
       socket.on('new turn', function(msg){
         $('#messages').append($('<li>').text(msg));
         $('#messages').append($('<li>').text("new turn : " + msg.id));
