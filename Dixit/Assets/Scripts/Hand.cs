@@ -59,7 +59,9 @@ public class Hand : MonoBehaviour {
             m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
         }
         m_IsInteractable = isInteractable;
+        m_IsPlayable = isPlayable;
     }
+
     public void Reset()
     {
         for (int i = 0; i < HAND_SIZE; i++)

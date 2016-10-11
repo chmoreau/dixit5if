@@ -59,7 +59,7 @@ public class Table : MonoBehaviour {
 
     public void Init(int slotNumber, string storytellerName = null, string theme = null, string[] cardIds = null, bool isFaceUp = false, bool isInteractable = false)
     {
-        m_ThemeInputPanel.SetActive(false);
+        Reset();
         m_Theme.text = theme;
         m_StorytellerName.text = storytellerName;
 
