@@ -20,15 +20,15 @@ public class Deck : MonoBehaviour {
         //Draw(string.Empty);
     }
 
-	public void DrawCard(string cardId, int handIndex)
+	public void DrawCard(string cardId, CardSlot cardSlot)
     {
-        Card card = Instantiate(m_CardPrefab, m_CardSpawnPoint.position, m_CardSpawnPoint.rotation) as Card;
+        Card card = FetchAndInstantiateCard(m_CardSpawnPoint, cardId);
         TransformAnimation.AnimationCallback onDrawEnd = () => 
         {
-            m_Hand.CardSlots[handIndex].Card = card;
-            m_Hand.CardSlots[handIndex].Card.transform.SetParent(m_Hand.CardSlots[handIndex].transform);
+            cardSlot.Card = card;
+            cardSlot.Card.transform.SetParent(cardSlot.transform);
         };
-        IEnumerator drawCoroutine = TransformAnimation.FromToAnimation(card.gameObject, m_CardSpawnPoint, m_Hand.CardSlots[handIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_DrawCardDuration, null, onDrawEnd);
+        IEnumerator drawCoroutine = TransformAnimation.FromToAnimation(card.gameObject, m_CardSpawnPoint, cardSlot.FaceUpAnchor, Vector3.zero, Vector3.zero, m_DrawCardDuration, null, onDrawEnd);
         StartCoroutine(drawCoroutine);
     }
 

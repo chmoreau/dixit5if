@@ -3,6 +3,8 @@ using System;
 using System.Collections;
 
 public class Hand : MonoBehaviour {
+    public const int HAND_SIZE = 6;
+
     [Serializable]
     public struct HandAnchor
     {
@@ -16,7 +18,9 @@ public class Hand : MonoBehaviour {
     }
 
     [SerializeField]
-    private CardSlot[] m_CardSlots = new CardSlot[6];
+    private Transform m_CardSlotPanel = null;
+    [SerializeField]
+    private CardSlot[] m_CardSlots = new CardSlot[HAND_SIZE];
     public CardSlot[] CardSlots { get { return m_CardSlots; } }
     [SerializeField]
     private Transform m_ZoomTargetPoint = null;
@@ -25,42 +29,77 @@ public class Hand : MonoBehaviour {
     [SerializeField]
     private float m_PlayDuration = 0.5f;
 
-    [Header("Test")]
-    [SerializeField]
-    private Deck m_Deck = null;
-    [SerializeField]
-    private Table m_Table = null;
+    //[Header("Test")]
+    
 
     private int m_SelectedCardIndex = -1;
     private bool m_IsInteractable = false;
+    public bool SetInteractable { set { m_IsInteractable = value; } }
+    private bool m_IsPlayable = false;
+    public bool SetPlayable { set { m_IsPlayable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
-
+    
     void Start()
     {
-        Init();
-        StartCoroutine("DrawInitHand");
+        //Init();
+        
     }
 
-    public void Init()
+    public void Init(string[] handIds = null, bool isInteractable = false, bool isPlayable = false)
     {
-        m_IsInteractable = true;
+        m_IsDrawing = false;
+        Reset();
+        if (handIds == null)
+        {
+            handIds = new string[0];
+        }
+        for (int i = 0; i < HAND_SIZE && i < handIds.Length; i++)
+        {
+            m_CardSlots[i].Card = GameSessionService.CurrentGameSession.InstantiateCard(handIds[i], m_CardSlots[i].FaceUpAnchor);
+            m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
+        }
+        m_IsInteractable = isInteractable;
     }
-
     public void Reset()
     {
+        for (int i = 0; i < HAND_SIZE; i++)
+        {
+            if (m_CardSlots[i].Card != null)
+            {
+                Destroy(m_CardSlots[i].Card.gameObject);
+            }
+            m_CardSlots[i].transform.SetSiblingIndex(0);
+            m_CardSlots[i].gameObject.SetActive(true);
+        }
+    }
+
+    public void Draw(string[] cardIds)
+    {
+        StartCoroutine("DrawHand", cardIds);
+    }
+
+    private bool m_IsDrawing = false;
+    IEnumerator DrawHand(string[] cardIds)
+    {
+        m_IsDrawing = true;
+
         foreach (CardSlot slot in m_CardSlots)
         {
             slot.gameObject.SetActive(true);
         }
-    }
 
-    IEnumerator DrawInitHand()
-    {
-        for (int i = 0; i < m_CardSlots.Length; i++)
+        int k = 0;        
+        for (int i = 0; i < m_CardSlotPanel.childCount; i++)
         {
-            m_Deck.DrawCard(string.Empty, i);
-            yield return new WaitForSeconds(0.8f);
+            CardSlot slot = m_CardSlotPanel.GetChild(i).GetComponent<CardSlot>();
+            if (slot.Card == null)
+            {
+                GameSessionService.CurrentGameSession.DrawCardFromDeck(cardIds[k++], slot);
+                yield return new WaitForSeconds(0.8f);
+            }
         }
+
+        m_IsDrawing = false;
     }
 
     public void FocusOnCard(int cardIndex)
@@ -100,17 +139,23 @@ public class Hand : MonoBehaviour {
 
     public void PlayCard()
     {
-        if (!m_IsInteractable) { return; }
+        if (!m_IsInteractable || !m_IsPlayable) { return; }
+        if (m_IsDrawing) { return; }
         if (m_ZoomCoroutine != null || m_SelectedCardIndex == -1) { return; }
 
-        CardSlot targetSlot = m_Table.AllocateSlot();
+        CardSlot targetSlot = GameSessionService.CurrentGameSession.AllocateTableSlot();
         if (targetSlot != null)
         {
-            //m_IsInteractable = false;
+            //Register card play to game server
+            if (!GameSessionService.CurrentGameSession.PlayCard(m_CardSlots[m_SelectedCardIndex].Card.CardId)) { return; }
+
+            m_IsInteractable = false;
+            m_IsPlayable = false;
             TransformAnimation.AnimationCallback onPlayStart = () => 
             {
                 m_CardSlots[m_SelectedCardIndex].Card.transform.SetParent(null);
                 m_CardSlots[m_SelectedCardIndex].gameObject.SetActive(false);
+                m_CardSlots[m_SelectedCardIndex].transform.SetAsLastSibling();
             };
             TransformAnimation.AnimationCallback onPlayEnd = () => 
             {

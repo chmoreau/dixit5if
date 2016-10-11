@@ -7,6 +7,7 @@ public class Card : MonoBehaviour {
     [Header("Model")]
     [SerializeField]
     private CardModel m_CardModel = null;
+    public string CardId { get { return m_CardModel != null ? m_CardModel.CardId : null; } }
 
     public void LoadModel(CardModel model)
     {

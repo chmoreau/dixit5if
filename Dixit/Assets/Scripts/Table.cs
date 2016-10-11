@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System;
 using System.Collections;
 
@@ -7,6 +8,12 @@ public class Table : MonoBehaviour {
     private RectTransform m_CardSlotPanel = null;
     [SerializeField]
     private CardSlot m_CardSlotPrefab = null;
+    [SerializeField]
+    private Text m_Theme = null;
+    [SerializeField]
+    private GameObject m_ThemeInputPanel = null;
+    [SerializeField]
+    private Text m_StorytellerName = null;
     [Header("Animations")]
     [SerializeField]
     private float m_ShuffleDuration = 1.0f;
@@ -38,19 +45,24 @@ public class Table : MonoBehaviour {
 
     private int m_SelectedCardIndex = -1;
     private bool m_IsInteractable = false;
+    public bool SetInteractable { set { m_IsInteractable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
 
     void Start()
     {
-        string[] initCardIds = new string[6];
-        Init(6, initCardIds, false);
+        //string[] initCardIds = new string[6];
+        //Init(6);
 
-        string[] shuffledCardIds = { "1", "2", "3", "5", "4", "6" };
-        StartCoroutine(ShuffleAndDisplayCards(shuffledCardIds));
+        //string[] shuffledCardIds = { "1", "2", "3", "5", "4", "6" };
+        //StartCoroutine(ShuffleAndDisplayCards(shuffledCardIds));
     }
 
-    public void Init(int slotNumber, string[] cardIds = null, bool isFaceUp = false, bool isInteractable = false)
+    public void Init(int slotNumber, string storytellerName = null, string theme = null, string[] cardIds = null, bool isFaceUp = false, bool isInteractable = false)
     {
+        m_ThemeInputPanel.SetActive(false);
+        m_Theme.text = theme;
+        m_StorytellerName.text = storytellerName;
+
         m_CardSlots = new CardSlot[slotNumber];
         if (cardIds == null)
         {
@@ -74,7 +86,9 @@ public class Table : MonoBehaviour {
 
     public void Reset()
     {
-
+        m_ThemeInputPanel.SetActive(false);
+        m_Theme.text = null;
+        m_StorytellerName.text = null;
     }
 
     public CardSlot AllocateSlot()
@@ -88,6 +102,32 @@ public class Table : MonoBehaviour {
             return null;
         }
     }
+
+    public void SetStorytellerName(string name)
+    {
+        m_StorytellerName.text = name;
+    }
+
+    public void ConfirmTheme()
+    {
+        string theme = m_ThemeInputPanel.GetComponentInChildren<InputField>().text;
+        if (string.IsNullOrEmpty(theme)) { return; }
+        if (GameSessionService.CurrentGameSession.ConfirmTheme(theme))
+        {
+            m_ThemeInputPanel.SetActive(false);
+            SetTheme(theme);
+        }
+    }
+
+    public void SetTheme(string theme)
+    {
+        m_Theme.text = theme;
+    }
+    
+    public void EnableThemeInput()
+    {
+        m_ThemeInputPanel.SetActive(true);
+    }    
 
     public IEnumerator ShuffleAndDisplayCards(string[] cardIds)
     {
@@ -110,7 +150,7 @@ public class Table : MonoBehaviour {
         m_IsInteractable = true;
     }
 
-    // Out of the coroutine body to avoid the scope issue :( 
+    // Out of the coroutine body to avoid the scope issue of local variables :(
     private TransformAnimation.AnimationCallback CreateReturnCoroutine(int slotIndex)
     {
         return () =>
