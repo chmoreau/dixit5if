@@ -1,10 +1,26 @@
+/**
+ * Interface for communicating with the players.
+ * 
+ * @constructor
+ * @param {Object} room : IO object representing the connection to the game namespace
+ * @param {Array} playerList : Array of the connected players with their socket
+ */
 function IOPlayer(room, playerList) {
     this.room = room;
     this.playerList = playerList;
 };
 
+/**
+ * Send a message to a player and listens for his response.
+ *
+ * @param {any} playerId : Id of the player to send the message
+ * @param {string} Type : Type of the message
+ * @param {any} content : Content of the message
+ * @param {string} resType : Type of the expected response message
+ * @param {function} callback : Callback function called when a response is sent by the receiver
+ */
 IOPlayer.prototype.sendToPlayer = function (playerId, type, content, resType, callback) {
-    var socket = getSocketPlayer(playerId, this.playerList);
+    var socket = getSocketFromPlayerId(playerId, this.playerList);
     if (socket != undefined) {
         if (resType !== undefined) {
             socket.once(resType, callback); //callback executed
@@ -15,6 +31,14 @@ IOPlayer.prototype.sendToPlayer = function (playerId, type, content, resType, ca
     }
 };
 
+/**
+ * Send a message to all players and listens for their response.
+ *
+ * @param {string} Type : Type of the message
+ * @param {any} content : Content of the message
+ * @param {string} resType : Type of the expected response message
+ * @param {function} callback : Callback function called when a response is sent by the receiver
+ */
 IOPlayer.prototype.sendToAll = function (type, content, resType, callback) {
     if (resType != undefined) {
         this.playerList.forEach(function (element) {
@@ -24,8 +48,15 @@ IOPlayer.prototype.sendToAll = function (type, content, resType, callback) {
     this.room.emit(type, content);
 };
 
+/**
+ * Listen for a specific message (only once) sent by a specific player.
+ *
+ * @param {any} playerId : Id of the player to listen
+ * @param {string} Type : Type of the expected message
+ * @param {function} callback : Callback function called when the message arrives
+ */
 IOPlayer.prototype.receiveMsgFrom = function (playerId, type, callback) {
-    var socket = getSocketPlayer(playerId, this.playerList);
+    var socket = getSocketFromPlayerId(playerId, this.playerList);
     if (socket !== undefined) {
         socket.once(type, callback);
     } else {
@@ -33,13 +64,19 @@ IOPlayer.prototype.receiveMsgFrom = function (playerId, type, callback) {
     }
 };
 
+/**
+ * Listen for a specific message (only once) sent by each player.
+ *
+ * @param {string} Type : Type of the expected message
+ * @param {function} callback : Callback function called when the message arrives
+ */
 IOPlayer.prototype.receiveMsg = function (type, callback) {
     this.playerList.forEach(function (element) {
         element.socket.once(resType, msg => callback(element.playerId, msg));
     });
 };
 
-function getSocketPlayer(playerId, playerList) {
+function getSocketFromPlayerId(playerId, playerList) {
     var socket = {};
     playerList.find(function (element, index, array) {
         if (element.playerId === playerId) {
