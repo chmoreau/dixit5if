@@ -1,60 +1,73 @@
-const sessionSize = 5;
+const SESSION_SIZE = 2;
+const MATCHMAKING_REQUEST = "matchmaking request";
+const QUEUE_SIZE = "queueSize"
+
+var Game = require('./game.js');
 
 // FIFO that represents the players that are waiting for a match
 var queue = [];
 
 module.exports = function Matchmaking(io) {
-  connect(io);
+    connect(io);
 }
 
 function connect(io) {
-  var matchmaking = io.of('/matchmaking')
-  matchmaking.on('connection', function (socket) {
+    var matchmaking = io.of('/matchmaking');
+    matchmaking.on('connection', function(socket) {
 
-    socket.on('matchmaking request', function (playerId) {
+        socket.on(MATCHMAKING_REQUEST, function(playerId) {
 
-      var player = { playerId: playerId, socketId: socket.id };
+            var player = { playerId: playerId, socket: socket };
 
-      // Add the user to the queue
-      queue.unshift(player);
+            // Add the user to the queue
+            queue.unshift(player);
 
-      console.log("Added player " + player.playerId + " to matchmaking");
+            console.log("Added player " + player.playerId + " to matchmaking");
 
-      var playerList = attemptMatch();
-      if (playerList.length == sessionSize) {
-        console.log("Created match with players : " + playerList.toString());
+            var playerList = attemptMatch();
+            if (playerList.length === SESSION_SIZE) {
+                console.log("Created match with players : " + playerList.toString());
 
-        // TODO notify the relevant players
-        socket.broadcast.to(playerList[0].socketId).emit('queueSize', 234);
-        socket.broadcast.to(playerList[1].socketId).emit('queueSize', 234);
-        socket.broadcast.to(playerList[2].socketId).emit('queueSize', 234);
-        socket.broadcast.to(playerList[3].socketId).emit('queueSize', 234);
-        socket.broadcast.to(playerList[4].socketId).emit('queueSize', 234);
-      }
+                // TODO notify the relevant players
+                var game = new Game(io, playerList);
+                playerList.forEach(function(element) {
+                    element.socket.join("lobby"+game.id);
+                }, this);
 
-      // Send the new queue size to the users
-      matchmaking.emit('queueSize', queue.length);
+                matchmaking.in("lobby"+game.id).emit('game created', game.id);
+            }
+
+            // Send the new queue size to the users
+            matchmaking.emit(QUEUE_SIZE, queue.length);
+
+        });
+
+        socket.on('disconnect', function() {
+            // Find the disconnected player from his socket id
+            var discPlayer = queue.find(function(element, index, array) {
+                return socket.id === element.socket.id;
+            });
+
+            if (discPlayer !== undefined) {
+                // Remove the player from the queue
+                queue.splice(queue.indexOf(discPlayer, 0), 1);
+                console.log(discPlayer.playerId + ' has left matchmaking');
+            }
+        });
 
     });
-
-    socket.on('disconnect', function () {
-
-    });
-
-  });
 }
 
 // Checks if there are enough players to create a match
 function attemptMatch() {
-  if (queue.length >= sessionSize) {
-    var playerList = [];
-    for (var i = 0; i < sessionSize; i++) {
-      playerList.push(queue.pop());
+    if (queue.length >= SESSION_SIZE) {
+        var playerList = [];
+        for (var i = 0; i < SESSION_SIZE; i++) {
+            playerList.push(queue.pop());
+        }
+        return playerList;
     }
-
-    return playerList;
-  }
-  else {
-    return [];
-  }
+    else {
+        return [];
+    }
 }
