@@ -35,9 +35,6 @@ public class Table : MonoBehaviour {
     private Transform m_ShuffleSpotPoint = null;
     [SerializeField]
     private Transform m_DisplayTargetPoint = null;
-    [Header("Test")]
-    [SerializeField]
-    private Deck m_Deck = null;
     
     private CardSlot[] m_CardSlots = new CardSlot[0];
     //public CardSlot[] CardSlots { get { return m_CardSlots; } }
@@ -48,18 +45,8 @@ public class Table : MonoBehaviour {
     public bool SetInteractable { set { m_IsInteractable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
 
-    void Start()
-    {
-        //string[] initCardIds = new string[6];
-        //Init(6);
-
-        //string[] shuffledCardIds = { "1", "2", "3", "5", "4", "6" };
-        //StartCoroutine(ShuffleAndDisplayCards(shuffledCardIds));
-    }
-
     public void Init(int slotNumber, string storytellerName = null, string theme = null, string[] cardIds = null, bool isFaceUp = false, bool isInteractable = false)
     {
-        Reset();
         m_Theme.text = theme;
         m_StorytellerName.text = storytellerName;
 
@@ -73,7 +60,7 @@ public class Table : MonoBehaviour {
             m_CardSlots[i] = Instantiate(m_CardSlotPrefab, m_CardSlotPanel, false) as CardSlot;
             if (i < cardIds.Length)
             {
-                m_CardSlots[i].Card = m_Deck.FetchAndInstantiateCard(isFaceUp ? m_CardSlots[i].FaceUpAnchor : m_CardSlots[i].FaceDownAnchor, cardIds[i]);
+                m_CardSlots[i].Card = GameSessionService.CurrentGameSession.InstantiateCard(cardIds[i], isFaceUp ? m_CardSlots[i].FaceUpAnchor : m_CardSlots[i].FaceDownAnchor);
                 m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
             }
             int k = i;
@@ -86,9 +73,20 @@ public class Table : MonoBehaviour {
 
     public void Reset()
     {
+        StopAllCoroutines();
+
+        m_SelectedCardIndex = -1;
         m_ThemeInputPanel.SetActive(false);
         m_Theme.text = null;
         m_StorytellerName.text = null;
+        foreach (CardSlot slot in m_CardSlots)
+        {
+            if (slot.Card != null)
+            {
+                Destroy(slot.Card.gameObject);
+            }
+            Destroy(slot.gameObject);
+        }
     }
 
     public CardSlot AllocateSlot()
@@ -133,7 +131,7 @@ public class Table : MonoBehaviour {
     {
         for (int i = 0; i < cardIds.Length; i++)
         {
-            m_CardSlots[i].Card.LoadModel(m_Deck.FetchCardModel(cardIds[i]));
+            m_CardSlots[i].Card.LoadModel(GameSessionService.CurrentGameSession.Deck.FetchCardModel(cardIds[i]));
             IEnumerator shuffleCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[i].Card.gameObject, m_CardSlots[i].FaceDownAnchor, m_ShuffleSpotPoint, Vector3.zero, Vector3.zero, m_ShuffleDuration, null, null);
             StartCoroutine(shuffleCoroutine);
             yield return new WaitForSeconds(m_ShuffleInterval);

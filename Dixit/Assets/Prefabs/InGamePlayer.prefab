@@ -113,7 +113,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Playername12
+  m_Text: Unknown
 --- !u!114 &114000010582590528
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -128,10 +128,10 @@ MonoBehaviour:
   m_StateViews:
   - State: 0
     Text: En attente
-    Color: {r: 1, g: 0.43137255, b: 0, a: 1}
+    Color: {r: 1, g: 0.39215687, b: 0, a: 1}
   - State: 1
     Text: Fini
-    Color: {r: 0, g: 0.43137255, b: 0, a: 1}
+    Color: {r: 0, g: 0.39215687, b: 0, a: 1}
   onNicknameUpdate:
     m_PersistentCalls:
       m_Calls:
@@ -228,7 +228,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 99
+  m_Text: 0
 --- !u!114 &114000011690736530
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Material: {fileID: 0}
-  m_Color: {r: 0, g: 0.43137255, b: 0, a: 1}
+  m_Color: {r: 0.39215687, g: 0, b: 0, a: 1}
   m_RaycastTarget: 1
   m_OnCullStateChanged:
     m_PersistentCalls:
@@ -279,7 +279,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Fini
+  m_Text: N/A
 --- !u!114 &114000012770872272
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -299,7 +299,7 @@ MonoBehaviour:
       m_Calls: []
     m_TypeName: UnityEngine.UI.MaskableGraphic+CullStateChangedEvent, UnityEngine.UI,
       Version=1.0.0.0, Culture=neutral, PublicKeyToken=null
-  m_Sprite: {fileID: 10907, guid: 0000000000000000f000000000000000, type: 0}
+  m_Sprite: {fileID: 10905, guid: 0000000000000000f000000000000000, type: 0}
   m_Type: 1
   m_PreserveAspect: 0
   m_FillCenter: 1

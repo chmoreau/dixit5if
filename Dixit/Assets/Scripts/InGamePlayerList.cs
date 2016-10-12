@@ -29,6 +29,11 @@ public class InGamePlayerList : MonoBehaviour {
         m_InGamePlayerListAnchor.gameObject.SetActive(!m_InGamePlayerListAnchor.gameObject.activeSelf);
     }
 
+    public void SetVisibile()
+    {
+        m_InGamePlayerListAnchor.gameObject.SetActive(true);
+    }
+
     public void LoadPlayers(InGamePlayerModel local, InGamePlayerModel[] others)
     {
         InGamePlayer localPlayer = Instantiate(m_InGamePlayerPrefab, m_InGamePlayerListAnchor, false) as InGamePlayer;

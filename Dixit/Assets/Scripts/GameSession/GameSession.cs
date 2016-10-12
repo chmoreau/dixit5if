@@ -17,13 +17,13 @@ public class GameSession : MonoBehaviour
         ShowScore = 4
     }
 
-    private const string INSTRUCTION_INITSESSION = "Attendez l'initalisation de la partie";
-    private const string INSTRUCTION_DRAWHAND = "Piocher les cartes jusqu'à une main de six cartes";
-    private const string INSTRUCTION_CHOOSETHEME_STORYTELLER = "PhaseVous etes le conteur de ce tour, écrivez le thème du tour";
-    private const string INSTRUCTION_CHOOSETHEME_OTHERS = "Attendez que le thème soit choisi par le conteur";
-    private const string INSTRUCTION_PLAYCARD = "Choisissez une carte qui vous fait penser au thème";
-    private const string INSTRUCTION_PICKCARD = "Votez pour la carte que vous pensez etre celle du conteur";
-    private const string INSTRUCTION_SHOWSCORE = "Voyez le résultat du vote et le décompte des points";
+    public const string INSTRUCTION_INITSESSION = "Attendez l'initalisation de la partie du jeu";
+    public const string INSTRUCTION_DRAWHAND = "Piocher les cartes jusqu'à une main de six cartes";
+    public const string INSTRUCTION_CHOOSETHEME_STORYTELLER = "PhaseVous etes le conteur de ce tour, écrivez le thème du tour";
+    public const string INSTRUCTION_CHOOSETHEME_OTHERS = "Attendez que le thème soit choisi par le conteur";
+    public const string INSTRUCTION_PLAYCARD = "Choisissez une carte qui vous fait penser au thème";
+    public const string INSTRUCTION_PICKCARD = "Votez pour la carte que vous pensez etre celle du conteur";
+    public const string INSTRUCTION_SHOWSCORE = "Voyez le résultat du vote et le décompte des points";
 
     public Deck Deck = null;
     public Hand Hand = null;
@@ -53,6 +53,14 @@ public class GameSession : MonoBehaviour
         HUD = FindObjectOfType<HUD>();
     }
 
+
+    void OnDestroy()
+    {
+        if (Deck != null) { Deck.Reset(); }
+        if (Hand != null) { Hand.Reset(); }
+        if (Table != null) { Table.Reset(); }
+        if (HUD != null) { HUD.Reset(); }
+    }
 
     public void TranslateToPhase(Phase targetPhase, params object[] args)
     {
@@ -104,7 +112,8 @@ public class GameSession : MonoBehaviour
         m_GameSessionId = sessionId;
         m_LocalPlayer = localPlayer;
         m_OtherPlayers = otherPlayers;
-        HUD.InGamePlayerList.Init();
+        Deck.Init();
+        HUD.Init();
         HUD.InGamePlayerList.LoadPlayers(localPlayer, otherPlayers);
         m_CurrentPhase = currentPhase;
         switch (m_CurrentPhase)

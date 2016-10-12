@@ -8,14 +8,13 @@ using System.Text;
 public class GameSessionService : MonoBehaviour
 {
     [Header("Test")]
-    [SerializeField]
-    private string SessionId = null;
-    [SerializeField]
-    private InGamePlayerModel LocalPlayer = null;
-    [SerializeField]
-    private InGamePlayerModel[] OtherPlayers = null;
-    [SerializeField]
-    private string[] HandIds = null;
+    public string SessionId = null;
+    public InGamePlayerModel LocalPlayer = null;
+    public InGamePlayerModel[] OtherPlayers = null;
+    public GameSession.Phase Phase = GameSession.Phase.InitSession;
+    public string[] HandIds = null;
+    public string Theme = null;
+    public string[] TableCardIds = null;
 
     private static GameSession m_CurrentGameSession = null;
     public static GameSession CurrentGameSession
@@ -27,29 +26,28 @@ public class GameSessionService : MonoBehaviour
 
     }
 
-    void OnDestroy()
+    #region Test
+    private void DestroySession()
     {
         if (m_CurrentGameSession != null)
         {
-            Destroy(m_CurrentGameSession.gameObject);
-
+            DestroyImmediate(m_CurrentGameSession.gameObject);
         }
     }
 
-    #region Test
-    public void TestCreate()
+    public void TestCreateSession()
     {
-        CreateNewSession();
+        DestroySession();
+        CreateSession();
     }
 
-    public void TestPlay()
+    public void TestPlayPhase()
     {
-        //m_CurrentGameSession.TranslateToPhase(GameSession.Phase.PlayCard);
+        DestroySession();
 
-        m_CurrentGameSession = new GameObject("GameSession", typeof(GameSession)).GetComponent<GameSession>();
-        m_CurrentGameSession.transform.SetParent(transform);
+        m_CurrentGameSession = InstantiateSessionInstance();
         LocalPlayer.State = InGamePlayerModel.InGameState.Waiting;
-        m_CurrentGameSession.InitSession(SessionId, LocalPlayer, OtherPlayers, GameSession.Phase.PlayCard, HandIds, "test_theme_wtf");
+        m_CurrentGameSession.InitSession(SessionId, LocalPlayer, OtherPlayers, GameSession.Phase.PlayCard, HandIds, "test_theme_abc");
     }
 
     public void TestUpdatePlayerState(string playerId)//, InGamePlayerModel.InGameState state = InGamePlayerModel.InGameState.Done)
@@ -58,14 +56,51 @@ public class GameSessionService : MonoBehaviour
     }
     #endregion
 
-    public void CreateNewSession()
+    public void FetchAllSessionSketchs()
+    {
+        // todo : network api
+        // get ids of all active sessions
+        // Network.FetchAllSessionSketchs(localPlayerId) return [](sessionIds, numPlayers, time since creation, etc.)
+    }
+
+    private GameSession InstantiateSessionInstance()
+    {
+        GameSession gameSession = new GameObject("GameSession", typeof(GameSession)).GetComponent<GameSession>();
+        gameSession.transform.SetParent(transform);
+        return gameSession;
+    }
+
+    public void CreateSession()
     {
         if (m_CurrentGameSession != null) { return; }
         // todo : network api
         // get sessionId, otherplayers and initHandIds from the server
-        m_CurrentGameSession = new GameObject("GameSession", typeof(GameSession)).GetComponent<GameSession>();
-        m_CurrentGameSession.transform.SetParent(transform);
-        m_CurrentGameSession.InitSession(SessionId, LocalPlayer, OtherPlayers);
+        // Network.CreateSession(); return sessionId,[]otherPlayers, []initHandIds
+        // Network.LocalPlayer
+        string sessionId = SessionId; // test
+        InGamePlayerModel localPlayer = LocalPlayer; // test
+        InGamePlayerModel[] otherPlayers = OtherPlayers; // test
+        string[] initHandIds = HandIds; // test
+
+        m_CurrentGameSession = InstantiateSessionInstance();
+        m_CurrentGameSession.InitSession(SessionId, localPlayer, otherPlayers);
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)initHandIds);
+    }
+
+    public void RestoreSession(string sessionId)
+    {
+        // todo : network api
+        // get all parameters to restore a seesion
+        // Network.FetchSession(sessionId)        
+        InGamePlayerModel localPlayer = LocalPlayer; // test
+        InGamePlayerModel[] otherPlayers = OtherPlayers; // test
+        GameSession.Phase currentPhase = (GameSession.Phase)Phase; // test
+        string[] handIds = HandIds; // test
+        string theme = Theme; // test
+        string[] tableCardIds = TableCardIds; // test
+
+        m_CurrentGameSession = InstantiateSessionInstance();
+        m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers, currentPhase, handIds, theme, tableCardIds);
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)HandIds);
     }
 }

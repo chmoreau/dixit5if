@@ -11,24 +11,26 @@ public class Deck : MonoBehaviour {
     private Transform m_CardSpawnPoint = null;
     [SerializeField]
     private float m_DrawCardDuration = 1.0f;
-    [Header("Test")]
-    [SerializeField]
-    private Hand m_Hand = null;
-
-    void Start()
+    
+    public void Init()
     {
-        //Draw(string.Empty);
+
+    }
+
+    public void Reset()
+    {
+        StopAllCoroutines();
     }
 
 	public void DrawCard(string cardId, CardSlot cardSlot)
     {
         Card card = FetchAndInstantiateCard(m_CardSpawnPoint, cardId);
-        TransformAnimation.AnimationCallback onDrawEnd = () => 
+        TransformAnimation.AnimationCallback onDrawStart = () => 
         {
             cardSlot.Card = card;
             cardSlot.Card.transform.SetParent(cardSlot.transform);
         };
-        IEnumerator drawCoroutine = TransformAnimation.FromToAnimation(card.gameObject, m_CardSpawnPoint, cardSlot.FaceUpAnchor, Vector3.zero, Vector3.zero, m_DrawCardDuration, null, onDrawEnd);
+        IEnumerator drawCoroutine = TransformAnimation.FromToAnimation(card.gameObject, m_CardSpawnPoint, cardSlot.FaceUpAnchor, Vector3.zero, Vector3.zero, m_DrawCardDuration, onDrawStart, null);
         StartCoroutine(drawCoroutine);
     }
 

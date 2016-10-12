@@ -28,27 +28,16 @@ public class Hand : MonoBehaviour {
     private float m_ZoomDuration = 0.5f;
     [SerializeField]
     private float m_PlayDuration = 0.5f;
-
-    //[Header("Test")]
     
-
     private int m_SelectedCardIndex = -1;
     private bool m_IsInteractable = false;
     public bool SetInteractable { set { m_IsInteractable = value; } }
     private bool m_IsPlayable = false;
     public bool SetPlayable { set { m_IsPlayable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
-    
-    void Start()
-    {
-        //Init();
-        
-    }
-
+   
     public void Init(string[] handIds = null, bool isInteractable = false, bool isPlayable = false)
     {
-        m_IsDrawing = false;
-        Reset();
         if (handIds == null)
         {
             handIds = new string[0];
@@ -58,19 +47,24 @@ public class Hand : MonoBehaviour {
             m_CardSlots[i].Card = GameSessionService.CurrentGameSession.InstantiateCard(handIds[i], m_CardSlots[i].FaceUpAnchor);
             m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
         }
+
+        m_IsDrawing = false;
         m_IsInteractable = isInteractable;
         m_IsPlayable = isPlayable;
     }
 
     public void Reset()
     {
+        StopAllCoroutines();
+
+        m_SelectedCardIndex = -1;
         for (int i = 0; i < HAND_SIZE; i++)
         {
             if (m_CardSlots[i].Card != null)
             {
                 Destroy(m_CardSlots[i].Card.gameObject);
             }
-            m_CardSlots[i].transform.SetSiblingIndex(0);
+            m_CardSlots[i].transform.SetSiblingIndex(i);
             m_CardSlots[i].gameObject.SetActive(true);
         }
     }
