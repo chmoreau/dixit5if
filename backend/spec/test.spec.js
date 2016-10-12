@@ -4,6 +4,15 @@ var request = require("request");
 var base_url = "http://localhost:3000/"
 
 describe("Hello World Server", function() {
+  
+  beforeAll(function(){
+    server.startServer(3000);
+  });
+  afterAll(function(){
+    console.log('closing server');
+    server.closeServer();
+  });
+
   describe("GET /", function() {
     it("returns status code 200", function(done) {
       request.get(base_url, function(error, response, body) {
@@ -12,11 +21,10 @@ describe("Hello World Server", function() {
       });
     });
   });
-});
-
-describe("Test débile comme Charles :", function() {
-
-  it("contains spec with an expectation", function() {
-    expect(true).toBe(true);
+    
+  describe("Test débile comme Charles :", function() {
+    it("contains spec with an expectation", function() {
+      expect(true).toBe(true);
+    });
   });
 });

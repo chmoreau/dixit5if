@@ -5,10 +5,13 @@ var base_url = "http://localhost:3000/"
 
 describe("All Tests", function(){
 
+    beforeAll(function(){
+        server.startServer(3000);
+    });
     afterAll(function(){
         console.log('closing server');
         server.closeServer();
-    })
+    });
     describe("GET /", function() {
         it("returns status code 200", function(done) {
             request.get(base_url, function(error, response, body) {
