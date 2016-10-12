@@ -9,6 +9,10 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
-http.listen(3000, function(){
+var server = http.listen(3000, function(){
   console.log('listening on *:3000');
 });
+
+module.exports.closeServer = function(){
+  server.close();
+};
