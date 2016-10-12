@@ -7,7 +7,8 @@ public class InGamePlayerModel
     public enum InGameState
     {
         Waiting = 0,
-        Done = 1
+        Done = 1,
+        Inactive = 2
     }
 
     [SerializeField]

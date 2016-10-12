@@ -1065,7 +1065,6 @@ MonoBehaviour:
   m_ZoomDuration: 0.5
   m_ShuffleSpotPoint: {fileID: 1568577673}
   m_DisplayTargetPoint: {fileID: 1142995387}
-  m_Deck: {fileID: 982170236}
 --- !u!1001 &271858581
 Prefab:
   m_ObjectHideFlags: 0
@@ -3964,7 +3963,6 @@ MonoBehaviour:
     type: 2}
   m_CardSpawnPoint: {fileID: 798284195}
   m_DrawCardDuration: 1.2
-  m_Hand: {fileID: 624962859}
 --- !u!1 &988464763
 GameObject:
   m_ObjectHideFlags: 0
@@ -7217,7 +7215,7 @@ MonoBehaviour:
   - m_UserId: test_remote_2
     m_Nickname: B
     m_IsStoryteller: 0
-    m_State: 1
+    m_State: 2
     m_Score: 0
   - m_UserId: test_remote_3
     m_Nickname: C

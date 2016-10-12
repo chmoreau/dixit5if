@@ -8,9 +8,9 @@ public class InGamePlayer : MonoBehaviour {
     [Serializable]
     private class StateView
     {
-        public InGamePlayerModel.InGameState State;
-        public string Text;
-        public Color Color;
+        public InGamePlayerModel.InGameState State = 0;
+        public string Text = null;
+        public Color Color = default(Color);
     }
 
     [Serializable]
