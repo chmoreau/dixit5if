@@ -39,7 +39,6 @@ function connect(io) {
 
             // Send the new queue size to the users
             matchmaking.emit(QUEUE_SIZE, queue.length);
-
         });
 
         socket.on('disconnect', function() {
