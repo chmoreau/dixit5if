@@ -2,7 +2,8 @@
 using System;
 
 [Serializable]
-public class CardModel {
+public class CardModel
+{
     [SerializeField]
     private string m_CardId;
     [SerializeField]

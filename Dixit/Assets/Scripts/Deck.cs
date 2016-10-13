@@ -24,7 +24,7 @@ public class Deck : MonoBehaviour {
 
 	public void DrawCard(string cardId, CardSlot cardSlot)
     {
-        Card card = FetchAndInstantiateCard(m_CardSpawnPoint, cardId);
+        Card card = FetchAndInstantiateCard(cardId, GameSessionService.CurrentGameSession.LocalPlayer.UserId, m_CardSpawnPoint);
         TransformAnimation.AnimationCallback onDrawStart = () => 
         {
             cardSlot.Card = card;
@@ -34,9 +34,10 @@ public class Deck : MonoBehaviour {
         StartCoroutine(drawCoroutine);
     }
 
-    public Card FetchAndInstantiateCard(Transform anchor, string cardId = null)
+    public Card FetchAndInstantiateCard(string cardId, string ownerId, Transform anchor)
     {
         Card card = Instantiate(m_CardPrefab, anchor.position, anchor.rotation) as Card;
+        card.SetOwner(ownerId);
         CardModel model = m_DeckDatabase.FetchCardModel(cardId);
         card.LoadModel(model);
         return card;

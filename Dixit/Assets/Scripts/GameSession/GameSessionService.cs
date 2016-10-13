@@ -14,7 +14,8 @@ public class GameSessionService : MonoBehaviour
     public GameSession.Phase Phase = GameSession.Phase.InitSession;
     public string[] HandIds = null;
     public string Theme = null;
-    public string[] TableCardIds = null;
+    public InGameCardModel[] TableCardIds = null;
+    public string[] VoteResult = null;
 
     private static GameSession m_CurrentGameSession = null;
     public static GameSession CurrentGameSession
@@ -23,7 +24,6 @@ public class GameSessionService : MonoBehaviour
         {
             return m_CurrentGameSession;
         }
-
     }
 
     #region Test
@@ -97,10 +97,10 @@ public class GameSessionService : MonoBehaviour
         GameSession.Phase currentPhase = (GameSession.Phase)Phase; // test
         string[] handIds = HandIds; // test
         string theme = Theme; // test
-        string[] tableCardIds = TableCardIds; // test
+        InGameCardModel[] tableCardIds = TableCardIds; // test
 
         m_CurrentGameSession = InstantiateSessionInstance();
-        m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers, currentPhase, handIds, theme, tableCardIds);
+        m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers, currentPhase, handIds, theme, tableCardIds, VoteResult);
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)HandIds);
     }
 }

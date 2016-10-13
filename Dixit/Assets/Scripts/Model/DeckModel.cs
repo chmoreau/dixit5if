@@ -2,7 +2,8 @@
 using System;
 
 [Serializable]
-public class DeckModel {
+public class DeckModel
+{
     [SerializeField]
     private string m_DeckId;
     [SerializeField]

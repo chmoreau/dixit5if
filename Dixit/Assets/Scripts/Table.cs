@@ -45,28 +45,34 @@ public class Table : MonoBehaviour {
     public bool SetInteractable { set { m_IsInteractable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
 
-    public void Init(int slotNumber, string storytellerName = null, string theme = null, string[] cardIds = null, bool isFaceUp = false, bool isInteractable = false)
+    public void Init(int slotNumber, string storytellerName = null, string theme = null, InGameCardModel[] tableCards = null, bool isFaceUp = false, bool isInteractable = false, string[] voteResult = null)
     {
         m_Theme.text = theme;
         m_StorytellerName.text = storytellerName;
 
         m_CardSlots = new CardSlot[slotNumber];
-        if (cardIds == null)
+        if (tableCards == null)
         {
-            cardIds = new string[0];
+            tableCards = new InGameCardModel[0];
         }
         for (int i = 0; i < slotNumber; i++)
         {
             m_CardSlots[i] = Instantiate(m_CardSlotPrefab, m_CardSlotPanel, false) as CardSlot;
-            if (i < cardIds.Length)
+            if (i < tableCards.Length)
             {
-                m_CardSlots[i].Card = GameSessionService.CurrentGameSession.InstantiateCard(cardIds[i], isFaceUp ? m_CardSlots[i].FaceUpAnchor : m_CardSlots[i].FaceDownAnchor);
+                m_CardSlots[i].Card = GameSessionService.CurrentGameSession.InstantiateCard(tableCards[i].CardId, tableCards[i].OwnerId, isFaceUp ? m_CardSlots[i].FaceUpAnchor : m_CardSlots[i].FaceDownAnchor);
                 m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
+
+                if (tableCards[i].IsThemeCard)
+                {
+                    // todo highlight theme card
+                }
+                //todo show votes
             }
             int k = i;
-            m_CardSlots[i].Clickable.onClick.AddListener(() => { FocusOnCard(k); });
+            m_CardSlots[i].Clickable.onClick.AddListener(() => { FocusOnCard(k); });            
         }
-        m_SlotPointer = cardIds.Length;
+        m_SlotPointer = tableCards.Length;
 
         m_IsInteractable = isInteractable;
     }

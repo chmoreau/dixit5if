@@ -30,9 +30,14 @@ public class GameSession : MonoBehaviour
     public Table Table = null;
     public HUD HUD = null;
 
-    //public Text Instruction = null;
-
     private InGamePlayerModel m_LocalPlayer = null;
+    public InGamePlayerModel LocalPlayer
+    {
+        get
+        {
+            return m_LocalPlayer;
+        }
+    }
     private InGamePlayerModel[] m_OtherPlayers = null;
     private InGamePlayerModel Storyteller
     {
@@ -107,7 +112,7 @@ public class GameSession : MonoBehaviour
         }
     }
 
-    public void InitSession(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, Phase currentPhase = Phase.InitSession, string[] handIds = null, string theme = null, string[] tableCardIds = null)
+    public void InitSession(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, Phase currentPhase = Phase.InitSession, string[] handIds = null, string theme = null, InGameCardModel[] tableCards = null, string[] voteResult = null)
     {
         m_GameSessionId = sessionId;
         m_LocalPlayer = localPlayer;
@@ -145,17 +150,17 @@ public class GameSession : MonoBehaviour
                 {
                     k += otherPlayer.State == InGamePlayerModel.InGameState.Done ? 1 : 0;
                 }
-                Table.Init(otherPlayers.Length + 1, Storyteller.Nickname, theme, new string[k]);
+                Table.Init(otherPlayers.Length + 1, Storyteller.Nickname, theme, new InGameCardModel[k], false);
                 break;
             case Phase.PickCard:
                 HUD.Instruction.text = INSTRUCTION_PICKCARD;
                 Hand.Init(handIds);
-                Table.Init(otherPlayers.Length + 1, Storyteller.Nickname, theme, tableCardIds);
+                Table.Init(otherPlayers.Length + 1, Storyteller.Nickname, theme, tableCards, true, true);
                 break;
             case Phase.ShowScore:
                 HUD.Instruction.text = INSTRUCTION_SHOWSCORE;
                 Hand.Init(handIds);
-                Table.Init(otherPlayers.Length + 1, Storyteller.Nickname, theme, tableCardIds);
+                Table.Init(otherPlayers.Length + 1, Storyteller.Nickname, theme, tableCards, true, false, voteResult);
                 break;
         }
     }    
@@ -199,9 +204,9 @@ public class GameSession : MonoBehaviour
         Deck.DrawCard(cardId, targetSlot);
     }
 
-    public Card InstantiateCard(string cardId, Transform anchor)
+    public Card InstantiateCard(string cardId, string ownerId, Transform anchor)
     {
-        return Deck.FetchAndInstantiateCard(anchor, cardId);
+        return Deck.FetchAndInstantiateCard(cardId, ownerId, anchor);
     }
 
     public CardSlot AllocateTableSlot()

@@ -25,8 +25,7 @@ public class InGamePlayer : MonoBehaviour {
     public StringEvent onNicknameUpdate = new StringEvent();
     public StringEvent onStateTextUpdate = new StringEvent();
     public ColorEvent onStateColorUpdate = new ColorEvent();
-    public StringEvent onScoreUpdate = new StringEvent();
- 
+    public StringEvent onScoreUpdate = new StringEvent(); 
 
     private InGamePlayerModel m_PlayerModel = null;
     public InGamePlayerModel PlayerModel { get { return m_PlayerModel; } }
