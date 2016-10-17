@@ -5,10 +5,10 @@
             "name": "Launch tests",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/backend/node_modules/jasmine/bin/jasmine.js",
+            "program": "${workspaceRoot}/src/node_modules/jasmine/bin/jasmine.js",
             "stopOnEntry": false,
             "args": [
-                "JASMINE_CONFIG_PATH=${workspaceRoot}/backend/spec/support/jasmine.json"
+                "JASMINE_CONFIG_PATH=${workspaceRoot}/src/spec/support/jasmine.json"
             ],
             "cwd": "${workspaceRoot}",
             "sourceMaps": true
@@ -17,7 +17,7 @@
             "name": "Launch",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceRoot}/backend/index.js",
+            "program": "${workspaceRoot}/src/index.js",
             "stopOnEntry": false,
             "args": [],
             "cwd": "${workspaceRoot}",
