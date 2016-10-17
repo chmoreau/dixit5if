@@ -1,4 +1,5 @@
 var server = require('../index.js');
+var Messages = require('../messageType');
 
 const playerIds = [1, 2];
 
@@ -9,6 +10,7 @@ describe("All Tests: ", function () {
 
     beforeAll(function () {
         server.startServer(3000);
+        jasmine.DEFAULT_TIMEOUT_INTERVAL = 500; // 500ms timeout 
     });
     afterAll(function () {
         console.log('closing server');
@@ -35,31 +37,34 @@ describe("All Tests: ", function () {
         });
 
         it("Should send matchmaking request and receive a response", function (done) {
-            socket.emit('matchmaking request', playerIds[0]);
-            socket.on('queueSize', function (msg) {
+            socket.emit(Messages.JOIN_MATCHMAKING, playerIds[0]);
+            socket.on(Messages.QUEUE_SIZE, function (msg) {
                 expect(msg => 0).toBeTruthy();
                 done();
             });
         });
 
         it("Should find a game when enough players are there", function(done) {
+            // Add more players to start a game
             for(var i=1; i<playerIds.length; i++) {
-                socket.emit('matchmaking request', playerIds[i]);
+                socket.emit(Messages.JOIN_MATCHMAKING, playerIds[i]);
             }
-            socket.on('game created', function(msg) {
+            socket.on(Messages.GAME_CREATED, function(msg) {
                 gameId = msg;
                 expect(msg).toEqual(jasmine.any(Number));
                 done();
             });
         })
 
-        it("Should start when everyone is ready", function() {
+        it("Should start the game when everyone is ready", function() {
             socket = require('socket.io-client')(base_url+'/game/'+gameId);
             for(var i=1; i<playerIds.length; i++) {
-                socket.emit('ready', playerIds[i]);
+                socket.emit(Messages.PLAYER_READY, playerIds[i]);
             }
             //TODO
         });
+
+        
 
     });
 
