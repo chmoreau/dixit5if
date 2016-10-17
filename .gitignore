@@ -1,6 +1,3 @@
-# Visual Code
-.vscode/
-
 # NodeJS
 backend/node_modules
 *.log
