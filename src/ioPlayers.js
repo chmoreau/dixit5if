@@ -73,7 +73,7 @@ IOPlayer.prototype.receiveMsgFrom = function (playerId, type, callback) {
  */
 IOPlayer.prototype.receiveMsg = function (type, callback) {
     this.playerList.forEach(function (element) {
-        element.socket.once(resType, msg => callback(element.playerId, msg));
+        element.socket.once(type, msg => callback(element.playerId, msg));
     });
 };
 

@@ -1,11 +1,13 @@
 const NB_CARD = 20;
 const HAND_SIZE = 3;
 
-var numGame = 0;
 var Match = require('./models/Match.js');
 var Turn = require('./models/Turn.js');
 var Player = require('./models/Player.js');
 var IOPlayer = require('./ioPlayers.js');
+var Messages = require('./messageType');
+
+var numGame = 0;
 
 function Game(io, playerList) {
     this.io = io;
@@ -14,19 +16,14 @@ function Game(io, playerList) {
     this.room = io.of('/game/'+ this.id);
     this.match = {};
     console.log('Game ' + this.id + ' created');
-    this.listenPlayer();
+    this.waitForPlayers();
 };
 
-Game.prototype.joinRoom = function(){
-    this.playerList.forEach(function(element) {
-        element.socket.join('/game/'+numGame);
-    }, this);
-};
-
-Game.prototype.listenPlayer = function(){
+Game.prototype.waitForPlayers = function(){
     var game = this;
-    this.room.on('connection', function(socket) {
-        socket.on('ready', function(playerID){
+    
+    this.room.on('connection', function(socket){
+        socket.on(Messages.PLAYER_READY, function(playerID){
             console.log('player ' + playerID + ' is ready');
             game.playerList.find(function(element, index, array) {
                 if(element.playerId === playerID){
@@ -36,54 +33,49 @@ Game.prototype.listenPlayer = function(){
             });
             if(allPlayerReady(game.playerList)){
                 console.log('Everyone is ready');
-                game.match = createMatch(game.playerList);
-                initHands(game.match);
-                electNarrator(game.match);
-                console.log('Init match done');
-                sendStartTurn(game);
+                game.playGame();                
             }
         });
         socket.on('disconnect', function(socket){
             //TODO
         });
-
-        socket.on('submit theme', function(theme){
-            console.log('narrator theme received');
-            match.turn.theme = theme;
-            sendNarratorTheme(theme);
-        });
-
-       /* socket.once('resTest', function(msg) {
-            console.log(msg);
-        });*/
-
-        socket.on('card played', function(data){ //TODO : remove card from player's hand
-
-            var yop = new IOPlayer(game.room, game.playerList);
-            yop.sendToAll('DEBUG', 'testcontent', 'DEBUG', function(playerId, res){
-                console.log(playerId+" response: "+res);
-            });
-
-            var playerID = data.playerID;
-            var cardID = data.cardID;
-            var match = game.match;
-            console.log('player ' + playerID + ' played the card ' + cardID);
-            match.players.find(function(element, index, array) {
-                if(element.playerId === playerID){
-                    var trick = match.turn.trick;
-                    for(var i = 0; i < trick.length; i++){
-                        if(trick[i][0] !== undefined){
-                            trick[i][0] = playerID;
-                            trick[i][1] = cardID;
-                        }
-                    }
-                };
-            });
-        });
-
     });
-    
-};
+}
+
+Game.prototype.playGame = function(){
+    ioPlayers = new IOPlayer(this.room, this.playerList);
+    this.match = createMatch(this.playerList);
+    initHands(this.match);
+    electNarrator(this.match);
+    console.log('Init match done');
+    var game = this;
+    sendStartTurn(this);
+
+    ioPlayers.receiveMsgFrom(this.match.turn.narrator, Messages.THEME, function(theme){
+        console.log('narrator theme received');
+        match.turn.theme = theme;
+        sendNarratorTheme(theme);
+    })
+
+    ioPlayers.receiveMsg(Messages.CARD_PLAYED, function(playerID, payload){
+        var playerID = playerID;
+        var cardID = payload.cardID;
+        var match = game.match;
+        console.log('player ' + playerID + ' played the card ' + cardID);
+        match.players.find(function(element, index, array) {
+            if(element.playerId === playerID){
+                var trick = match.turn.trick;
+                for(var i = 0; i < trick.length; i++){
+                    if(trick[i][0] !== undefined){
+                        trick[i][0] = playerID;
+                        trick[i][1] = cardID;
+                    }
+                }
+            };
+        });
+    });
+
+}
 
 function allPlayerReady(playerList){
     var ready = true;

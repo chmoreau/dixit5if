@@ -20,21 +20,21 @@
       <input id="card" autocomplete="off" /><button>Card</button>
     </form>
       
-    <scriptsrc="https://cdn.socket.io/socket.io-1.2.0.js"></script>
-    <scriptsrc="http://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
     <script>
       var socket = io('/matchmaking');
       var playerID;
       $('form').submit(function(){
-        socket.emit('matchmaking request', $('#m').val());
+        socket.emit('JOIN_MATCHMAKING', $('#m').val());
         playerID = $('#m').val();
         $('#m').val('');
         return false;
       });
-      socket.on('queueSize', function(msg){
+      socket.on('QUEUE_SIZE', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
-      socket.on('game created', function(msg){
+      socket.on('GAME_CREATED', function(msg){
         socket = io('/game/'+msg);
 
         socket.on('DEBUG', function(msg){
@@ -45,13 +45,13 @@
         socket.emit('ready', playerID);
         $('#messages').append($('<li>').text('room '+msg+' joined'));
       });
-      socket.on('new turn', function(msg){
+      socket.on('NEW_TURN', function(msg){
         $('#messages').append($('<li>').text(msg));
         $('#messages').append($('<li>').text("new turn : " + msg.id));
       });
       $('form').submit(function(){
         $('#messages').append($('<li>').text("test : " + playerID));
-        socket.emit('card played', {playerID:playerID, cardID:$('#card').val()});
+        socket.emit('CARD_PLAYED', {playerID:playerID, cardID:$('#card').val()});
       });
     </script>
   </body>
