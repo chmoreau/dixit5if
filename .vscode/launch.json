@@ -2,6 +2,21 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Mocha tests",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceRoot}/src/node_modules/mocha/bin/_mocha",
+            "stopOnEntry": false,
+            "args": [
+                "test/**/*.js"
+            ],
+            "cwd": "${workspaceRoot}",
+            "runtimeExecutable": null,
+            "env": {
+                "NODE_ENV": "testing"
+            }
+        },
+        {
             "name": "Launch tests",
             "type": "node",
             "request": "launch",

@@ -136,7 +136,7 @@ function sendStartTurn(game){
             return playerInfo.playerId === element.id;
         });
         newTurn.narrator = game.match.turn.narrator;
-        socket.emit('new turn', newTurn); //TODO adapt with the protocol
+        socket.emit(Messages.CARDS, newTurn); //TODO adapt with the protocol
 
     })
     console.log('start turn information sent');
