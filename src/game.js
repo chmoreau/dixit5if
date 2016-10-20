@@ -47,7 +47,7 @@ Game.prototype.playGame = function(){
     this.match = createMatch(this.playerList);
     initHands(this.match);
     electNarrator(this.match);
-    console.log('Init match done');
+    console.log('Init match done : init hand + elect narrator');
     var game = this;
     sendStartTurn(this);
 
@@ -63,14 +63,14 @@ Game.prototype.playGame = function(){
         var match = game.match;
         console.log('player ' + playerID + ' played the card ' + cardID);
         match.players.find(function(element, index, array) {
-            if(element.playerId === playerID){
+            if(element.id === playerID){
                 var trick = match.turn.trick;
-                for(var i = 0; i < trick.length; i++){
-                    if(trick[i][0] !== undefined){
-                        trick[i][0] = playerID;
-                        trick[i][1] = cardID;
-                    }
+                var i = 0;
+                while(trick[i][0] !== undefined && i < trick.length){
+                    i++;
                 }
+                trick[i][0] = playerID;
+                trick[i][1] = cardID;
             };
         });
     });
