@@ -1,7 +1,6 @@
 const SESSION_SIZE = 2;
-const MATCHMAKING_REQUEST = "matchmaking request";
-const QUEUE_SIZE = "queueSize"
 
+var Messages = require('./messageType');
 var Game = require('./game.js');
 
 // FIFO that represents the players that are waiting for a match
@@ -15,7 +14,7 @@ function connect(io) {
     var matchmaking = io.of('/matchmaking');
     matchmaking.on('connection', function(socket) {
 
-        socket.on(MATCHMAKING_REQUEST, function(playerId) {
+        socket.on(Messages.JOIN_MATCHMAKING, function(playerId) {
 
             var player = { playerId: playerId, socket: socket };
 
@@ -34,11 +33,11 @@ function connect(io) {
                     element.socket.join("lobby"+game.id);
                 }, this);
 
-                matchmaking.in("lobby"+game.id).emit('game created', game.id);
+                matchmaking.in("lobby"+game.id).emit(Messages.GAME_CREATED, game.id);
             }
 
             // Send the new queue size to the users
-            matchmaking.emit(QUEUE_SIZE, queue.length);
+            matchmaking.emit(Messages.QUEUE_SIZE, queue.length);
         });
 
         socket.on('disconnect', function() {

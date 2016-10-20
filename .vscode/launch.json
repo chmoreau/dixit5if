@@ -8,7 +8,7 @@
             "program": "${workspaceRoot}/src/node_modules/jasmine/bin/jasmine.js",
             "stopOnEntry": false,
             "args": [
-                "JASMINE_CONFIG_PATH=${workspaceRoot}/src/spec/support/jasmine.json"
+                "JASMINE_CONFIG_PATH=${workspaceRoot}/spec/support/jasmine.json"
             ],
             "cwd": "${workspaceRoot}",
             "sourceMaps": true

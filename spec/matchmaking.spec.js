@@ -1,9 +1,9 @@
-var server = require('../index.js');
-var Messages = require('../messageType');
+var server = require('../src/index.js');
+var Messages = require('../src/messageType');
 
 const playerIds = [1, 2];
 
-var request = require("request");
+var request = require("../src/node_modules/request");
 var base_url = "http://localhost:3000"
 
 describe("All Tests: ", function () {
@@ -27,7 +27,7 @@ describe("All Tests: ", function () {
     });
 
     describe("Matchmaking: ", function () {
-        var socket = require('socket.io-client')(base_url+'/matchmaking');
+        var socket = require('../src/node_modules/socket.io-client')(base_url+'/matchmaking');
         var gameId;
 
         it("Should connect to matchmaking", function (done) {
@@ -57,7 +57,7 @@ describe("All Tests: ", function () {
         })
 
         it("Should start the game when everyone is ready", function() {
-            socket = require('socket.io-client')(base_url+'/game/'+gameId);
+            socket = require('../src/node_modules/socket.io-client')(base_url+'/game/'+gameId);
             for(var i=1; i<playerIds.length; i++) {
                 socket.emit(Messages.PLAYER_READY, playerIds[i]);
             }
