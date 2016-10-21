@@ -49,30 +49,41 @@ Game.prototype.playGame = function(){
     electNarrator(this.match);
     console.log('Init match done : init hand + elect narrator');
     var game = this;
-    sendStartTurn(this);
+    sendStartTurn(this, ioPlayers);
 
     ioPlayers.receiveMsgFrom(this.match.turn.narrator, Messages.THEME, function(theme){
         console.log('narrator theme received');
         match.turn.theme = theme;
-        sendNarratorTheme(theme);
-    })
+        ioPlayers.sendToAll(Messages.THEME, theme);
+        console.log('Narrator theme broadcasted');
+    });
 
-    ioPlayers.receiveMsg(Messages.CARD_PLAYED, function(playerID, payload){
+    ioPlayers.receiveMsg(Messages.PLAY_CARD, function(playerID, payload){
         var playerID = playerID;
         var cardID = payload.cardID;
         var match = game.match;
+        var trick = match.turn.trick;
         console.log('player ' + playerID + ' played the card ' + cardID);
         match.players.find(function(element, index, array) {
             if(element.id === playerID){
-                var trick = match.turn.trick;
-                var i = 0;
-                while(trick[i][0] !== undefined && i < trick.length){
-                    i++;
+                var j = 0;
+                while(trick[0][j] !== undefined){
+                    j++;
                 }
-                trick[i][0] = playerID;
-                trick[i][1] = cardID;
+                trick[0][j] = playerID;
+                trick[1][j] = cardID;
+                ioPlayers.sendToAll(Messages.CARD_PLAYED, element.id);
             };
         });
+        if(match.players.length === trick[0].length){
+            //if all played, send revealed cards
+            var cards = [];
+            for(var i = 0; i < trick[0].length; i++){
+                cards.push(trick[1][i]);
+            }
+            //TODO : mélanger cartes
+            ioPlayers.sendToAll(Messages.REVEAL_CARD, cards);
+        }
     });
 
 }
@@ -128,27 +139,17 @@ function electNarrator(match){
     match.turn.narrator = match.players[(match.nbTurn-1)%(match.players.length)].id;
 }
 
-function sendStartTurn(game){
+function sendStartTurn(game, ioPlayers){
     // Sending players' infos (score, hand, id = username) and the narrator id
     game.playerList.forEach(function(playerInfo){
-        var socket = playerInfo.socket;
         var newTurn = game.match.players.find(function(element, index, array) {
             return playerInfo.playerId === element.id;
         });
         newTurn.narrator = game.match.turn.narrator;
-        socket.emit(Messages.CARDS, newTurn); //TODO adapt with the protocol
+        ioPlayers.sendToPlayer(playerInfo.playerId, Messages.START_TURN, newTurn);
 
     })
     console.log('start turn information sent');
-}
-
-function sendNarratorTheme(theme){
-    game.playerList.forEach(function(playerInfo){
-        var socket = playerInfo.socket;
-        socket.emit('narrator theme', theme); //TODO adapt with the protocol
-
-    })
-    console.log('Narrator theme broadcasted');
 }
 
 module.exports = Game;

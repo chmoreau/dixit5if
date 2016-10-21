@@ -16,6 +16,8 @@
   <body>
     <input id="player" autofocus/><button id="playerID">playerID</button>
     </br></br>
+    <input id="theme"/><button id="sendTheme">send theme</button>
+    </br></br>
     <input id="card"/><button id="playCard">play card</button>
 
     <ul id="messages"></ul>
@@ -33,7 +35,12 @@
 
       $('#playCard').click(function(){
         $('#messages').append($('<li>').text("card played : " + $('#card').val()));
-        socket.emit('CARD_PLAYED', {playerID:playerID, cardID:$('#card').val()});
+        socket.emit('PLAY_CARD', {playerID:playerID, cardID:$('#card').val()});
+      });
+
+      $('#sendTheme').click(function(){
+        $('#messages').append($('<li>').text("theme : " + $('#theme').val()));
+        socket.emit('THEME', $('#theme').val());
       });
 
       socket.on('QUEUE_SIZE', function(msg){
@@ -50,9 +57,21 @@
         socket.emit('PLAYER_READY', playerID);
         $('#messages').append($('<li>').text('room '+msg+' joined'));
 
-        socket.on('NEW_TURN', function(msg){
+        socket.on('START_TURN', function(msg){
           $('#messages').append($('<li>').text(msg));
           $('#messages').append($('<li>').text("new turn : " + msg.id));
+        });
+
+        socket.on('CARD_PLAYED', function(msg){
+          $('#messages').append($('<li>').text("player " + msg + " played a card"));
+        });
+
+        socket.on('REVEAL_CARD', function(revealed){
+          var cards = "";
+          for(var i = 0; i < revealed.length; i++){
+            cards += revealed[i] + " ";
+          }
+          $('#messages').append($('<li>').text("Revealed cards " + cards + " played a card"));
         });
       });
       

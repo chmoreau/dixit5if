@@ -14,6 +14,7 @@ module.exports = Object.freeze({
     TRICK: 'TRICK',
     NEW_TURN: 'NEW_TURN',
     GAME_OVER: 'GAME_OVER',
-    CONTEXT: 'CONTEXT'
+    CONTEXT: 'CONTEXT',
+    START_TURN: 'START_TURN'
 });
 
