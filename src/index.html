@@ -39,7 +39,6 @@
       });
 
       $('#sendTheme').click(function(){
-        $('#messages').append($('<li>').text("theme : " + $('#theme').val()));
         socket.emit('THEME', $('#theme').val());
       });
 
@@ -54,12 +53,17 @@
           socket.emit('DEBUG', 'DEBUG REPLY');
         });
 
+        socket.on('THEME', function(msg){
+          $('#messages').append($('<li>').text('theme: '+msg));
+        });
+
         socket.emit('PLAYER_READY', playerID);
         $('#messages').append($('<li>').text('room '+msg+' joined'));
 
         socket.on('START_TURN', function(msg){
           $('#messages').append($('<li>').text(msg));
-          $('#messages').append($('<li>').text("new turn : " + msg.id));
+          $('#messages').append($('<li>').text("new turn"));
+          $('#messages').append($('<li>').text("narrator : " + msg.narrator));
         });
 
         socket.on('CARD_PLAYED', function(msg){
