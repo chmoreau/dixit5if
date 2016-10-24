@@ -1,4 +1,4 @@
-const NB_CARD = 20;
+const STACK_SIZE = 20;
 const HAND_SIZE = 3;
 
 var Match = require('./models/Match.js');
@@ -7,6 +7,7 @@ var Player = require('./models/Player.js');
 var IOPlayer = require('./ioPlayers.js');
 var Messages = require('./messageType');
 
+// global counter to identify each game from their id
 var numGame = 0;
 
 function Game(io, playerList) {
@@ -76,18 +77,22 @@ Game.prototype.playGame = function(){
             };
         });
         if(match.players.length === trick[0].length){
-            //if all played, send revealed cards
+            //when everyone has played, send revealed cards
             var cards = [];
             for(var i = 0; i < trick[0].length; i++){
                 cards.push(trick[1][i]);
             }
-            //TODO : mélanger cartes
+            //TODO : shuffle the cards
             ioPlayers.sendToAll(Messages.REVEAL_CARD, cards);
         }
     });
 
 }
 
+/**
+ * Checks if all the players are ready.
+ * @return {boolean} ready
+ */
 function allPlayerReady(playerList){
     var ready = true;
     playerList.forEach(function(element) {
@@ -98,11 +103,16 @@ function allPlayerReady(playerList){
     return ready;
 }
 
+/**
+ * Init all the variables of the match
+ * @param {array} playerList : List of the participating players
+ * @return {object} match : Object representing the state of the match
+ */
 function createMatch(playerList){
     //init nbTurn
     var nbTurn = 1;
     // init the stack
-    var stack = initStack(NB_CARD);
+    var stack = initStack(STACK_SIZE);
     console.log(stack.toString());
     // init players
     var players = [];
@@ -113,15 +123,24 @@ function createMatch(playerList){
     return match;
 }
 
+/**
+ * Generates a random array of numbers representing the cards's id.
+ * @param {number} stackSize : Number of cards to be generated
+ * @return {array} stack : The generated cards ids 
+ */
 function initStack(stackSize){
     var allCards = [];
-    for(var i = 0; i < NB_CARD; i++){
+    for(var i = 0; i < STACK_SIZE; i++){
         allCards[i] = i+1;
     }
     var stack = allCards.sort(function(){ return 0.5 - Math.random()}).slice(0, stackSize);
     return stack;
 }
 
+/**
+ * Gives each player their cards by picking from the stack
+ * @param {Object} match : Object representing the state of the match
+ */
 function initHands(match){
     // init the hand of players -> use it at the start of a match
     match.players.forEach(function(player){
@@ -131,11 +150,13 @@ function initHands(match){
         }
         player.hand = cards;
     });
-    
 }
 
+/**
+ * Elect the narrator beginning from the first player to the last.
+ * @param {Object} match : Object representing the state of the match 
+ */
 function electNarrator(match){
-    // choose a narrator among the players
     match.turn.narrator = match.players[(match.nbTurn-1)%(match.players.length)].id;
 }
 

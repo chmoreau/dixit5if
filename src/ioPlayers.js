@@ -3,7 +3,7 @@
  * 
  * @constructor
  * @param {Object} room : IO object representing the connection to the game's' namespace
- * @param {Array} playerList : Array of the connected players with their socket
+ * @param {array} playerList : Array of the connected players with their socket
  */
 function IOPlayer(room, playerList) {
     this.room = room;
@@ -66,7 +66,7 @@ IOPlayer.prototype.receiveMsgFrom = function (playerId, type, callback) {
 };
 
 /**
- * Listen for a specific message (only once) sent by each player.
+ * Listens for a specific message (only once) sent by each player.
  *
  * @param {string} type : Type of the expected message
  * @param {resCallback} callback : Callback function called when the message arrives

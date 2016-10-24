@@ -37,7 +37,7 @@ describe('Playing a simple game:', function () {
         it("Should send matchmaking request and receive the queue size", function (done) {
             socket.emit(Messages.JOIN_MATCHMAKING, playerIds[0]);
             socket.once(Messages.QUEUE_SIZE, function (msg) {
-                // expect(msg => 0).toBeTruthy();
+                assert.equal(msg, 1);
                 done();
             });
         });
@@ -70,26 +70,28 @@ describe('Playing a simple game:', function () {
         playerIds.forEach(function (playerId) {
             it("Should notify everybody when a player is ready", function () {
                 socket.emit(Messages.PLAYER_READY, playerId);
-              /*  var responseCount = 0; // All players should be notified when a player is ready
-                socket.on(Messages.PLAYER_READY, function () {
-                    if (++responseCount === playerIds.length) {
-                    
-                    }
-                });*/
+                /*  var responseCount = 0; // All players should be notified when a player is ready
+                  socket.on(Messages.PLAYER_READY, function () {
+                      if (++responseCount === playerIds.length) {
+                      
+                      }
+                  });*/
             });
         })
 
-        it("Should receive cards", function (done) {
+        it("Should receive cards and narrator ID", function (done) {
             socket.on(Messages.CARDS, function (cards) {
                 done();
             })
         });
 
-        it("Should receive narrator ID");
-
-        it("Should send theme");
-
-        it("Should receive theme");
+        it("Should send and receive theme", function (done) {
+            socket.emit(Messages.THEME, "my theme");
+            socket.once(Messages.THEME, function (theme) {
+                assert.equal("my theme", theme);
+                done();
+            })
+        });
 
         it("Should be notified when a player has played a card");
 
