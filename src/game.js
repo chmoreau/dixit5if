@@ -24,6 +24,8 @@ Game.prototype.waitForPlayers = function(){
     var game = this;
     
     this.room.on('connection', function(socket){
+        /** PLAYER READY */
+        // we doesn't prevent players when another is ready'
         socket.on(Messages.PLAYER_READY, function(playerID){
             console.log('player ' + playerID + ' is ready');
             game.playerList.find(function(element, index, array) {
@@ -50,15 +52,19 @@ Game.prototype.playGame = function(){
     electNarrator(this.match);
     console.log('Init match done : init hand + elect narrator');
     var game = this;
+    
+    /** START TURN*/
     sendStartTurn(this, ioPlayers);
 
+    /** THEME RECEIVED */
     ioPlayers.receiveMsgFrom(this.match.turn.narrator, Messages.THEME, function(theme){
         console.log('narrator theme received');
-        match.turn.theme = theme;
+        game.match.turn.theme = theme;
         ioPlayers.sendToAll(Messages.THEME, theme);
         console.log('Narrator theme broadcasted');
     });
 
+    /** PLAY CARD */
     ioPlayers.receiveMsg(Messages.PLAY_CARD, function(playerID, payload){
         var playerID = playerID;
         var cardID = payload.cardID;
@@ -68,6 +74,13 @@ Game.prototype.playGame = function(){
         match.players.find(function(element, index, array) {
             if(element.id === playerID){
                 var j = 0;
+                // remove card from player's hand
+                element.hand = element.hand.filter(function(element){
+                    if(element == cardID){
+                        return false;
+                    }
+                    return true;
+                });
                 while(trick[0][j] !== undefined){
                     j++;
                 }
@@ -76,6 +89,7 @@ Game.prototype.playGame = function(){
                 ioPlayers.sendToAll(Messages.CARD_PLAYED, element.id);
             };
         });
+        /** REVEAL CARD */
         if(match.players.length === trick[0].length){
             //when everyone has played, send revealed cards
             var cards = [];
@@ -144,9 +158,11 @@ function initStack(stackSize){
 function initHands(match){
     // init the hand of players -> use it at the start of a match
     match.players.forEach(function(player){
+        console.log("hand's player "+player.id + " :");
         var cards = [];
         for(var i = 0; i < HAND_SIZE; i++){
             cards.push(match.stack.pop());
+            console.log(cards[i]);
         }
         player.hand = cards;
     });
