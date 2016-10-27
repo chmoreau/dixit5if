@@ -48,7 +48,7 @@ Game.prototype.waitForPlayers = function(){
 Game.prototype.playGame = function(){
     ioPlayers = new IOPlayer(this.room, this.playerList);
     this.match = createMatch(this.playerList);
-    initHands(this.match);
+    distributeCards(this.match);
     electNarrator(this.match);
     console.log('Init match done : init hand + elect narrator');
     var game = this;
@@ -86,7 +86,7 @@ Game.prototype.playGame = function(){
                 }
                 trick[0][j] = playerID;
                 trick[1][j] = cardID;
-                ioPlayers.sendToAll(Messages.CARD_PLAYED, element.id);
+                ioPlayers.sendToAll(Messages.CARD_PLAYED, playerID);
             };
         });
         /** REVEAL CARD */
@@ -98,6 +98,28 @@ Game.prototype.playGame = function(){
             }
             //TODO : shuffle the cards
             ioPlayers.sendToAll(Messages.REVEAL_CARD, cards);
+        }
+    });
+
+    ioPlayers.receiveMsg(Messages.CARD_PICKED, function(playerId, payload){
+        var playerID = playerID;
+        var voteID = payload.voteID;
+        var match = game.match;
+        var trick = match.turn.trick;
+        console.log('player ' + playerID + ' picked the card ' + voteID);
+        match.players.find(function(element, index, array) {
+            if(element.id === playerID){
+                var j = 0;
+                while(trick[0][j] !== playerID){
+                    j++;
+                }
+                trick[2][j] = voteID;
+                ioPlayers.sendToAll(Messages.CARD_PICKED, playerID);
+            };
+        });
+        // TODO : Everyone has voted : calculate score and send informations
+        if(match.players.length === trick[2].length){
+
         }
     });
 
@@ -155,12 +177,14 @@ function initStack(stackSize){
  * Gives each player their cards by picking from the stack
  * @param {Object} match : Object representing the state of the match
  */
-function initHands(match){
+function distributeCards(match){
     // init the hand of players -> use it at the start of a match
     match.players.forEach(function(player){
         console.log("hand's player "+player.id + " :");
         var cards = [];
-        for(var i = 0; i < HAND_SIZE; i++){
+        var playerHand = player.hand || [];
+        var handSize = playerHand.length;
+        for(var i = handSize; i < HAND_SIZE; i++){
             cards.push(match.stack.pop());
             console.log(cards[i]);
         }
@@ -176,8 +200,12 @@ function electNarrator(match){
     match.turn.narrator = match.players[(match.nbTurn-1)%(match.players.length)].id;
 }
 
+/**
+ * Informations sent :
+ * - player's infos : score, hand, id
+ * - narrator id
+ */
 function sendStartTurn(game, ioPlayers){
-    // Sending players' infos (score, hand, id = username) and the narrator id
     game.playerList.forEach(function(playerInfo){
         var newTurn = game.match.players.find(function(element, index, array) {
             return playerInfo.playerId === element.id;
