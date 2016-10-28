@@ -79,6 +79,7 @@ describe('Playing a simple game:', function () {
             });
         })
 
+        /**TODO : change test, now it receives START_TURN with cards, narratorID, playerID and score */
         it("Should receive cards and narrator ID", function (done) {
             socket.on(Messages.CARDS, function (cards) {
                 done();

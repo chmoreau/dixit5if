@@ -19,6 +19,8 @@
     <input id="theme"/><button id="sendTheme">send theme</button>
     </br></br>
     <input id="card"/><button id="playCard">play card</button>
+    </br></br>
+    <input id="vote"/><button id="pickCard">pick card</button>
 
     <ul id="messages"></ul>
       
@@ -27,10 +29,15 @@
     <script>
       var socket = io('/matchmaking');
       var playerID;
+
       $("#playerID").click(function(){
         socket.emit('JOIN_MATCHMAKING', $('#player').val());
         playerID = $('#player').val();
         return false;
+      });
+
+      $('#sendTheme').click(function(){
+        socket.emit('THEME', $('#theme').val());
       });
 
       $('#playCard').click(function(){
@@ -38,23 +45,21 @@
         socket.emit('PLAY_CARD', {playerID:playerID, cardID:$('#card').val()});
       });
 
-      $('#sendTheme').click(function(){
-        socket.emit('THEME', $('#theme').val());
+      $('#pickCard').click(function(){
+        $('#messages').append($('<li>').text("card picked : " + $('#vote').val()));
+        socket.emit('PICK_CARD', {playerID:playerID, voteID:$('#vote').val()});
       });
 
       socket.on('QUEUE_SIZE', function(msg){
         $('#messages').append($('<li>').text(msg));
       });
+      
       socket.on('GAME_CREATED', function(msg){
         socket = io('/game/'+msg);
 
         socket.on('DEBUG', function(msg){
           $('#messages').append($('<li>').text('DEBUG MSG: '+msg));
           socket.emit('DEBUG', 'DEBUG REPLY');
-        });
-
-        socket.on('THEME', function(msg){
-          $('#messages').append($('<li>').text('theme: '+msg));
         });
 
         socket.emit('PLAYER_READY', playerID);
@@ -64,6 +69,10 @@
           $('#messages').append($('<li>').text(msg));
           $('#messages').append($('<li>').text("new turn"));
           $('#messages').append($('<li>').text("narrator : " + msg.narrator));
+        });
+
+        socket.on('THEME', function(msg){
+          $('#messages').append($('<li>').text('theme: '+msg));
         });
 
         socket.on('CARD_PLAYED', function(msg){
@@ -76,6 +85,10 @@
             cards += revealed[i] + " ";
           }
           $('#messages').append($('<li>').text("Revealed cards " + cards + " played a card"));
+        });
+
+        socket.on('CARD_PICKED', function(msg){
+          $('#messages').append($('<li>').text("player " + msg + " picked a card"));
         });
       });
       

@@ -66,7 +66,6 @@ Game.prototype.playGame = function(){
 
     /** PLAY CARD */
     ioPlayers.receiveMsg(Messages.PLAY_CARD, function(playerID, payload){
-        var playerID = playerID;
         var cardID = payload.cardID;
         var match = game.match;
         var trick = match.turn.trick;
@@ -101,28 +100,108 @@ Game.prototype.playGame = function(){
         }
     });
 
-    ioPlayers.receiveMsg(Messages.CARD_PICKED, function(playerId, payload){
-        var playerID = playerID;
-        var voteID = payload.voteID;
-        var match = game.match;
-        var trick = match.turn.trick;
-        console.log('player ' + playerID + ' picked the card ' + voteID);
-        match.players.find(function(element, index, array) {
-            if(element.id === playerID){
-                var j = 0;
-                while(trick[0][j] !== playerID){
-                    j++;
-                }
-                trick[2][j] = voteID;
-                ioPlayers.sendToAll(Messages.CARD_PICKED, playerID);
-            };
-        });
-        // TODO : Everyone has voted : calculate score and send informations
-        if(match.players.length === trick[2].length){
+    ioPlayers.receiveMsg(Messages.PICK_CARD, function(playerId, payload){
+        if(playerId != game.match.turn.narrator){
+            var voteID = payload.voteID;
+            var match = game.match;
+            var trick = match.turn.trick;
 
+            //TODO : check if the card picked by the player isn't his own card
+
+            console.log('player ' + playerId + ' picked the card ' + voteID);
+            match.players.find(function(element, index, array) {
+                if(element.id === playerId){
+                    trick[2][index] = voteID;
+                    ioPlayers.sendToAll(Messages.CARD_PICKED, playerId);
+                };
+            });
+            // TODO : Everyone has voted : calculate score and send informations
+            if(checkEveryonePicked(trick, match.turn.narrator)){
+                console.log("everyone has voted");
+                trick = calculteScores(match.turn);
+                console.log("scores calculated");
+                ioPlayers.sendToAll(Messages.TRICK, trick);
+                //TODO : update player's scores
+            }
         }
     });
 
+}
+
+function checkEveryonePicked(trick, narratorID){
+    var allPicked = true;
+    var votes = trick[2];
+    var players = trick[0];
+    var nbVotes = 0;
+    for(var i = 0; i < votes.length; i++){
+        var playerID = players[i];
+        var voteID = votes[i];
+        if(playerID != narratorID && voteID != -1){
+            nbVotes++;
+        }
+    }
+    if(nbVotes !== players.length-1){ ///we exclude the narrator
+        allPicked = false;
+    }
+    return allPicked;
+}
+
+function calculteScores(turn){
+    var narratorID = turn.narrator;
+    var trick = turn.trick;
+    var players = trick[0];
+    var votes = trick[2];
+    var narratorCard = getNarratorCard(trick, narratorID);
+    var nbNarrVote = getNbNarratorVote(trick, narratorCard);
+    
+    if(nbNarrVote === (players.length-1 || 0)){
+        // +2 for all players except the narrator
+        players.find(function(element, index, array) {
+            if(element !== narratorID){
+                trick[3][index] += 2;
+            };
+        });
+        console.log("+2 for everyone");
+    } else {
+        players.find(function(element, index, array) {
+            if(element == narratorID){
+                trick[3][index] += 3;
+            } else {
+                if(votes[index] == narratorCard){
+                    trick[3][index] += 3;
+                }
+                var playerCard = trick[1][index];
+                var nbPlayerCardVote = 0;
+                votes.forEach(function(element, index, array) {
+                    if(element == playerCard){
+                        nbPlayerCardVote++;
+                    };
+                });
+                trick[3][index] += nbPlayerCardVote;
+            };
+        });
+    }
+    return trick;
+}
+
+function getNarratorCard(trick, narratorID){
+    var narratorCard = -1;
+    trick[0].find(function(element, index, array) {
+        if(element === narratorID){
+            narratorCard = trick[1][index];
+        };
+    });
+    return narratorCard;
+}
+
+function getNbNarratorVote(trick, narratorCard){
+    var nbVoteNarr = 0;
+    trick[2].forEach(function(element, index, array) {
+        if(element == narratorCard){
+            nbVoteNarr++;
+        };
+    });
+    return nbVoteNarr;
 }
 
 /**
@@ -156,6 +235,11 @@ function createMatch(playerList){
         players.push(new Player(element.playerId, 0));
     }, this)
     var match = new Match(numGame, players, stack, new Turn(), nbTurn);
+    for(var i = 0; i < playerList.length; i++){
+        match.turn.trick[3][i] = 0;
+        match.turn.trick[2][i] = -1;
+        match.turn.trick[1][i] = -1;
+    }
     return match;
 }
 
