@@ -25,13 +25,13 @@ Game.prototype.waitForPlayers = function(){
     
     this.room.on('connection', function(socket){
         /** PLAYER READY */
-        // we doesn't prevent players when another is ready'
+        // we don't prevent players when another player is ready'
         socket.on(Messages.PLAYER_READY, function(playerID){
             console.log('player ' + playerID + ' is ready');
-            game.playerList.find(function(element, index, array) {
-                if(element.playerId === playerID){
-                    element.socket = socket;
-                    element.ready = true;
+            game.playerList.find(function(player, index, array) {
+                if(player.playerId === playerID){
+                    player.socket = socket;
+                    player.ready = true;
                 };
             });
             if(allPlayerReady(game.playerList)){
@@ -48,13 +48,15 @@ Game.prototype.waitForPlayers = function(){
 Game.prototype.playGame = function(){
     ioPlayers = new IOPlayer(this.room, this.playerList);
     this.match = createMatch(this.playerList);
+    initTurn(this.match);
     distributeCards(this.match);
     electNarrator(this.match);
-    console.log('Init match done : init hand + elect narrator');
+    console.log('Init match done : init turn + init hand + elect narrator');
     var game = this;
-    
+
     /** START TURN*/
-    sendStartTurn(this, ioPlayers);
+    sendStartTurn(game, ioPlayers);
+
 
     /** THEME RECEIVED */
     ioPlayers.receiveMsgFrom(this.match.turn.narrator, Messages.THEME, function(theme){
@@ -70,12 +72,12 @@ Game.prototype.playGame = function(){
         var match = game.match;
         var trick = match.turn.trick;
         console.log('player ' + playerID + ' played the card ' + cardID);
-        match.players.find(function(element, index, array) {
-            if(element.id === playerID){
+        match.players.find(function(player, index, array) {
+            if(player.id === playerID){
                 var j = 0;
                 // remove card from player's hand
-                element.hand = element.hand.filter(function(element){
-                    if(element == cardID){
+                player.hand = player.hand.filter(function(card){
+                    if(card == cardID){
                         return false;
                     }
                     return true;
@@ -90,12 +92,11 @@ Game.prototype.playGame = function(){
         });
         /** REVEAL CARD */
         if(match.players.length === trick[0].length){
-            //when everyone has played, send revealed cards
             var cards = [];
             for(var i = 0; i < trick[0].length; i++){
                 cards.push(trick[1][i]);
             }
-            //TODO : shuffle the cards
+            cards = cards.sort(function(){ return 0.5 - Math.random()});
             ioPlayers.sendToAll(Messages.REVEAL_CARD, cards);
         }
     });
@@ -109,27 +110,82 @@ Game.prototype.playGame = function(){
             //TODO : check if the card picked by the player isn't his own card
 
             console.log('player ' + playerId + ' picked the card ' + voteID);
-            match.players.find(function(element, index, array) {
-                if(element.id === playerId){
-                    trick[2][index] = voteID;
+            match.players.find(function(player) {
+                if(player.id === playerId){
+                    var idx = 0;
+                    while(trick[0][idx] != playerId){
+                        idx++;
+                    }
+                    trick[2][idx] = voteID;
                     ioPlayers.sendToAll(Messages.CARD_PICKED, playerId);
                 };
             });
-            // TODO : Everyone has voted : calculate score and send informations
-            if(checkEveryonePicked(trick, match.turn.narrator)){
-                console.log("everyone has voted");
-                trick = calculteScores(match.turn);
-                console.log("scores calculated");
-                ioPlayers.sendToAll(Messages.TRICK, trick);
-                //TODO : update player's scores
+            
+            if(allPlayersHaveVoted(trick, match.turn.narrator)){
+                calculteScores(match.turn);
+                console.log("scores of the turn calculated");
+                /**TRICK */
+                ioPlayers.sendToAll(Messages.TRICK, match.turn.trick);
+                updatePlayersScores(match);
+                console.log("players' scores updated");
+                var scores = getScores(match.players);
+                if(match.stack.length < match.players.length && match.players[0].hand.length === 0){
+                    /**GAME_OVER */
+                    ioPlayers.sendToAll(Messages.GAME_OVER, scores);
+                } else {
+                    /**NEW_TURN */
+                    ioPlayers.sendToAll(Messages.NEW_TURN, scores);
+                    match.nbTurn++;
+                    initTurn(match);
+                    distributeCards(match);
+                    electNarrator(match);
+                    sendStartTurn(game, ioPlayers);
+                }
+
             }
         }
     });
 
 }
 
-function checkEveryonePicked(trick, narratorID){
-    var allPicked = true;
+/**
+ * Update players scores
+ * @param {Object} match : Object representing the state of the match
+ */
+function updatePlayersScores(match){
+    var players = match.players;
+    var trick = match.turn.trick;
+    players.forEach(function(player){
+        trick[0].find(function(playerID, index, array) {
+            if(playerID == player.id){
+                player.score += trick[3][index];
+            };
+        });
+    });
+    match.players = players;
+}
+
+/**
+ * Get players score
+ * @return {array} scores
+ */
+function getScores(players){
+    var scores = [];
+    players.forEach(function(player){
+        var score = {};
+        score.player = player.id;
+        score.value = player.score;
+        scores.push(score);
+    });
+    return scores;
+}
+
+/**
+ * Checks if all the players have voted
+ * @return {boolean} haveVoted
+ */
+function allPlayersHaveVoted(trick, narratorID){
+    var haveVoted = true;
     var votes = trick[2];
     var players = trick[0];
     var nbVotes = 0;
@@ -141,11 +197,15 @@ function checkEveryonePicked(trick, narratorID){
         }
     }
     if(nbVotes !== players.length-1){ ///we exclude the narrator
-        allPicked = false;
+        haveVoted = false;
     }
-    return allPicked;
+    return haveVoted;
 }
 
+/**
+ * Update the trick with scores updated
+ * @param {object} turn : Object representing the turn of the match
+ */
 function calculteScores(turn){
     var narratorID = turn.narrator;
     var trick = turn.trick;
@@ -156,15 +216,15 @@ function calculteScores(turn){
     
     if(nbNarrVote === (players.length-1 || 0)){
         // +2 for all players except the narrator
-        players.find(function(element, index, array) {
-            if(element !== narratorID){
+        players.find(function(player, index, array) {
+            if(player !== narratorID){
                 trick[3][index] += 2;
             };
         });
         console.log("+2 for everyone");
     } else {
-        players.find(function(element, index, array) {
-            if(element == narratorID){
+        players.find(function(player, index, array) {
+            if(player == narratorID){
                 trick[3][index] += 3;
             } else {
                 if(votes[index] == narratorCard){
@@ -172,8 +232,8 @@ function calculteScores(turn){
                 }
                 var playerCard = trick[1][index];
                 var nbPlayerCardVote = 0;
-                votes.forEach(function(element, index, array) {
-                    if(element == playerCard){
+                votes.forEach(function(voteCard, index, array) {
+                    if(voteCard == playerCard){
                         nbPlayerCardVote++;
                     };
                 });
@@ -181,23 +241,31 @@ function calculteScores(turn){
             };
         });
     }
-    return trick;
+    turn.trick = trick;
 }
 
+/**
+ * Gives the card picked by the narrator
+ * @return {number} cardID
+ */
 function getNarratorCard(trick, narratorID){
-    var narratorCard = -1;
-    trick[0].find(function(element, index, array) {
-        if(element === narratorID){
-            narratorCard = trick[1][index];
+    var cardID = -1;
+    trick[0].find(function(playerID, index, array) {
+        if(playerID === narratorID){
+            cardID = trick[1][index];
         };
     });
-    return narratorCard;
+    return cardID;
 }
 
+/**
+ * Gives the number of votes for the narrator's card
+ * @return {number} nbVoteNarr
+ */
 function getNbNarratorVote(trick, narratorCard){
     var nbVoteNarr = 0;
-    trick[2].forEach(function(element, index, array) {
-        if(element == narratorCard){
+    trick[2].forEach(function(voteCard, index, array) {
+        if(voteCard == narratorCard){
             nbVoteNarr++;
         };
     });
@@ -210,8 +278,8 @@ function getNbNarratorVote(trick, narratorCard){
  */
 function allPlayerReady(playerList){
     var ready = true;
-    playerList.forEach(function(element) {
-        if(element.ready !== true){
+    playerList.forEach(function(playerInfo) {
+        if(playerInfo.ready !== true){
             ready = false;
         };
     });
@@ -231,16 +299,27 @@ function createMatch(playerList){
     console.log(stack.toString());
     // init players
     var players = [];
-    playerList.forEach(function(element){
-        players.push(new Player(element.playerId, 0));
+    playerList.forEach(function(playerInfo){
+        players.push(new Player(playerInfo.playerId, 0));
     }, this)
     var match = new Match(numGame, players, stack, new Turn(), nbTurn);
-    for(var i = 0; i < playerList.length; i++){
-        match.turn.trick[3][i] = 0;
-        match.turn.trick[2][i] = -1;
-        match.turn.trick[1][i] = -1;
-    }
     return match;
+}
+
+/**
+ * Init the turn
+ * @param {number} nbPlayers : number of players
+ * @return {object} turn : Object representing the current turn
+ */
+function initTurn(match){
+    var nbPlayers = match.players.length;
+    var turn = new Turn();
+    for(var i = 0; i < nbPlayers; i++){
+        turn.trick[3][i] = 0;
+        turn.trick[2][i] = -1;
+        turn.trick[1][i] = -1;
+    }
+    match.turn = turn;
 }
 
 /**
@@ -263,17 +342,22 @@ function initStack(stackSize){
  */
 function distributeCards(match){
     // init the hand of players -> use it at the start of a match
-    match.players.forEach(function(player){
-        console.log("hand's player "+player.id + " :");
-        var cards = [];
-        var playerHand = player.hand || [];
-        var handSize = playerHand.length;
-        for(var i = handSize; i < HAND_SIZE; i++){
-            cards.push(match.stack.pop());
-            console.log(cards[i]);
-        }
-        player.hand = cards;
-    });
+    if(match.stack.length >= match.players.length){
+        match.players.forEach(function(player){
+            console.log("hand's player "+player.id + " :");
+            var cards = [];
+            var playerHand = player.hand || [];
+            var handSize = playerHand.length;
+            for(var i = handSize; i < HAND_SIZE; i++){
+                cards.push(match.stack.pop());
+            }
+            player.hand = playerHand.concat(cards);
+            for(var i = 0; i < HAND_SIZE; i++){
+                console.log(player.hand[i]);
+            }
+        });
+    }
+    
 }
 
 /**
@@ -291,8 +375,8 @@ function electNarrator(match){
  */
 function sendStartTurn(game, ioPlayers){
     game.playerList.forEach(function(playerInfo){
-        var newTurn = game.match.players.find(function(element, index, array) {
-            return playerInfo.playerId === element.id;
+        var newTurn = game.match.players.find(function(player, index, array) {
+            return playerInfo.playerId === player.id;
         });
         newTurn.narrator = game.match.turn.narrator;
         ioPlayers.sendToPlayer(playerInfo.playerId, Messages.START_TURN, newTurn);

@@ -66,6 +66,22 @@ IOPlayer.prototype.receiveMsgFrom = function (playerId, type, callback) {
 };
 
 /**
+ * Listen for a specific message (only once) sent by each player except one.
+ *
+ * @param {any} playerId : Id of the player to except
+ * @param {string} type : Type of the expected message
+ * @param {resCallback} callback : Callback function called when the message arrives
+ */
+IOPlayer.prototype.receiveMsgExcept = function (playerId, type, callback) {
+
+    this.playerList.forEach(function (element) {
+        if(element !== playerId){
+            element.socket.once(type, msg => callback(element.playerId, msg));
+        }   
+    });
+};
+
+/**
  * Listens for a specific message (only once) sent by each player.
  *
  * @param {string} type : Type of the expected message

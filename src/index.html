@@ -14,6 +14,8 @@
     </style>
   </head>
   <body>
+    <ul id="messages"></ul>
+
     <input id="player" autofocus/><button id="playerID">playerID</button>
     </br></br>
     <input id="theme"/><button id="sendTheme">send theme</button>
@@ -21,8 +23,6 @@
     <input id="card"/><button id="playCard">play card</button>
     </br></br>
     <input id="vote"/><button id="pickCard">pick card</button>
-
-    <ul id="messages"></ul>
       
     <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
     <script src="http://code.jquery.com/jquery-1.11.1.js"></script>
@@ -89,6 +89,18 @@
 
         socket.on('CARD_PICKED', function(msg){
           $('#messages').append($('<li>').text("player " + msg + " picked a card"));
+        });
+
+        socket.on('TRICK', function(msg){
+          $('#messages').append($('<li>').text("all payers picked a card : end of the turn"));
+        });
+
+        socket.on('NEW_TURN', function(msg){
+          $('#messages').append($('<li>').text("new turn"));
+        });
+
+        socket.on('GAME_OVER', function(msg){
+          $('#messages').append($('<li>').text("game over !!"));
         });
       });
       
