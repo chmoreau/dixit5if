@@ -48,25 +48,28 @@ Game.prototype.waitForPlayers = function(){
 Game.prototype.playGame = function(){
     ioPlayers = new IOPlayer(this.room, this.playerList);
     this.match = createMatch(this.playerList);
+    this.newTurn(ioPlayers);
+}
+
+Game.prototype.newTurn = function(ioPlayers) {
+    this.match.nbTurn++;
     initTurn(this.match);
     distributeCards(this.match);
     electNarrator(this.match);
-    console.log('Init match done : init turn + init hand + elect narrator');
+
+    // Send new turn infos
+    sendStartTurn(this, ioPlayers);
+
     var game = this;
 
-    /** START TURN*/
-    sendStartTurn(game, ioPlayers);
-
-
-    /** THEME RECEIVED */
+    // Receive the theme from the narrator
     ioPlayers.receiveMsgFrom(this.match.turn.narrator, Messages.THEME, function(theme){
-        console.log('narrator theme received');
+        console.log('theme: '+theme);
         game.match.turn.theme = theme;
         ioPlayers.sendToAll(Messages.THEME, theme);
-        console.log('Narrator theme broadcasted');
     });
 
-    /** PLAY CARD */
+    // Receive the card pick from each player
     ioPlayers.receiveMsg(Messages.PLAY_CARD, function(playerID, payload){
         var cardID = payload.cardID;
         var match = game.match;
@@ -135,17 +138,12 @@ Game.prototype.playGame = function(){
                 } else {
                     /**NEW_TURN */
                     ioPlayers.sendToAll(Messages.NEW_TURN, scores);
-                    match.nbTurn++;
-                    initTurn(match);
-                    distributeCards(match);
-                    electNarrator(match);
-                    sendStartTurn(game, ioPlayers);
+                    game.newTurn(ioPlayers);
                 }
 
             }
         }
     });
-
 }
 
 /**
