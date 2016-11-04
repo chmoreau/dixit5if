@@ -11,8 +11,8 @@ module.exports = function Matchmaking(io) {
 }
 
 function connect(io) {
-    var matchmaking = io.of('/matchmaking');
-    matchmaking.on('connection', function(socket) {
+    //var matchmaking = io.of('/matchmaking');
+    io.on('connection', function(socket) {
 
         socket.on(Messages.JOIN_MATCHMAKING, function(playerId) {
 
@@ -33,11 +33,11 @@ function connect(io) {
                     element.socket.join("lobby"+game.id);
                 }, this);
 
-                matchmaking.in("lobby"+game.id).emit(Messages.GAME_CREATED, game.id);
+                io.in("lobby"+game.id).emit(Messages.GAME_CREATED, game.id);
             }
 
             // Send the new queue size to the users
-            matchmaking.emit(Messages.QUEUE_SIZE, queue.length);
+            io.emit(Messages.QUEUE_SIZE, queue.length);
         });
 
         socket.on('disconnect', function() {
