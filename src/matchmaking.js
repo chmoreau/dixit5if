@@ -14,9 +14,9 @@ function connect(io) {
     //var matchmaking = io.of('/matchmaking');
     io.on('connection', function(socket) {
 
-        socket.on(Messages.JOIN_MATCHMAKING, function(playerId) {
+        socket.on(Messages.JOIN_MATCHMAKING, function(msg) {
 
-            var player = { playerId: playerId, socket: socket };
+            var player = { playerId: msg.playerID, socket: socket };
 
             // Add the user to the queue
             queue.unshift(player);
@@ -33,11 +33,11 @@ function connect(io) {
                     element.socket.join(game.room);
                 }, this);
 
-                io.in(game.room).emit(Messages.GAME_CREATED, game.id);
+                io.in(game.room).emit(Messages.GAME_CREATED, {gameID: game.id});
             }
 
             // Send the new queue size to the users
-            io.emit(Messages.QUEUE_SIZE, queue.length);
+            io.emit(Messages.QUEUE_SIZE, {queueLength:queue.length});
         });
 
         socket.on('disconnect', function() {

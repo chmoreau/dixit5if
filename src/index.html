@@ -31,13 +31,13 @@
       var playerID;
 
       $("#playerID").click(function(){
-        socket.emit('JOIN_MATCHMAKING', $('#player').val());
+        socket.emit('JOIN_MATCHMAKING', {playerID : $('#player').val()});
         playerID = $('#player').val();
         return false;
       });
 
       $('#sendTheme').click(function(){
-        socket.emit('THEME', $('#theme').val());
+        socket.emit('THEME', {theme:$('#theme').val()});
       });
 
       $('#playCard').click(function(){
@@ -51,7 +51,7 @@
       });
 
       socket.on('QUEUE_SIZE', function(msg){
-        $('#messages').append($('<li>').text(msg));
+        $('#messages').append($('<li>').text(msg.queueLength));
       });
       
       socket.on('GAME_CREATED', function(msg){
@@ -61,26 +61,27 @@
           $('#messages').append($('<li>').text('DEBUG MSG: '+msg));
           socket.emit('DEBUG', 'DEBUG REPLY');
         });
+        
+        socket.emit('PLAYER_READY', {playerID : playerID, lala : "lala"});
 
-        socket.emit('PLAYER_READY', playerID);
-        $('#messages').append($('<li>').text('room '+msg+' joined'));
+        $('#messages').append($('<li>').text('room '+msg.gameID+' joined'));
       });
 
         socket.on('START_TURN', function(msg){
-          $('#messages').append($('<li>').text(msg));
-          $('#messages').append($('<li>').text("new turn"));
-          $('#messages').append($('<li>').text("narrator : " + msg.narrator));
+          $('#messages').append($('<li>').text("start turn"));
+          $('#messages').append($('<li>').text("narrator : " + msg.turn.narrator));
         });
 
         socket.on('THEME', function(msg){
-          $('#messages').append($('<li>').text('theme: '+msg));
+          $('#messages').append($('<li>').text('theme: '+msg.theme));
         });
 
         socket.on('CARD_PLAYED', function(msg){
-          $('#messages').append($('<li>').text("player " + msg + " played a card"));
+          $('#messages').append($('<li>').text("player " + msg.playerID + " played a card"));
         });
 
-        socket.on('REVEAL_CARD', function(revealed){
+        socket.on('REVEAL_CARD', function(msg){
+          var revealed = msg.cards;
           var cards = "";
           for(var i = 0; i < revealed.length; i++){
             cards += revealed[i] + " ";
@@ -89,7 +90,7 @@
         });
 
         socket.on('CARD_PICKED', function(msg){
-          $('#messages').append($('<li>').text("player " + msg + " picked a card"));
+          $('#messages').append($('<li>').text("player " + msg.playerID + " picked a card"));
         });
 
         socket.on('TRICK', function(msg){
