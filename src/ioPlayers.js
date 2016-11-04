@@ -5,8 +5,9 @@
  * @param {Object} room : IO object representing the connection to the game's' namespace
  * @param {array} playerList : Array of the connected players with their socket
  */
-function IOPlayer(room, playerList) {
+function IOPlayer(io, room, playerList) {
     this.room = room;
+    this.io = io;
     this.playerList = playerList;
 };
 
@@ -46,7 +47,7 @@ IOPlayer.prototype.sendToAll = function (type, content, resType, callback) {
             element.socket.once(resType, msg => callback(element.playerId, msg));
         });
     }
-    this.room.emit(type, content);
+    this.io.in(this.room).emit(type, content);
 };
 
 /**

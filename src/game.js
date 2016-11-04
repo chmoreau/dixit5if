@@ -14,39 +14,37 @@ function Game(io, playerList) {
     this.io = io;
     this.playerList = playerList;
     this.id = ++numGame;
-    this.room = io.of('/game/'+ this.id);
+    this.room = 'game'+this.id;
     this.match = {};
     console.log('Game ' + this.id + ' created');
+
     this.waitForPlayers();
 };
 
 Game.prototype.waitForPlayers = function(){
     var game = this;
+    var ioPlayers = new IOPlayer(this.io, this.room, this.playerList);
     
-    this.room.on('connection', function(socket){
-        /** PLAYER READY */
-        // we don't prevent players when another player is ready'
-        socket.on(Messages.PLAYER_READY, function(playerID){
-            console.log('player ' + playerID + ' is ready');
-            game.playerList.find(function(player, index, array) {
-                if(player.playerId === playerID){
-                    player.socket = socket;
-                    player.ready = true;
-                };
-            });
-            if(allPlayerReady(game.playerList)){
-                console.log('Everyone is ready');
-                game.playGame();                
-            }
+    /** PLAYER READY */
+    // we don't prevent players when another player is ready'
+    ioPlayers.receiveMsg(Messages.PLAYER_READY, function(playerID){
+        console.log('player ' + playerID + ' is ready');
+        game.playerList.find(function(player, index, array) {
+            if(player.playerId === playerID){
+                player.ready = true;
+            };
         });
-        socket.on('disconnect', function(socket){
-            //TODO
-        });
+        if(allPlayerReady(game.playerList)){
+            console.log('Everyone is ready');
+            game.playGame(ioPlayers);                
+        }
     });
+    //ioPlayers.on('disconnect', function(socket){
+        //TODO
+   // });
 }
 
-Game.prototype.playGame = function(){
-    ioPlayers = new IOPlayer(this.room, this.playerList);
+Game.prototype.playGame = function(ioPlayers){
     this.match = createMatch(this.playerList);
     this.newTurn(ioPlayers);
 }

@@ -55,7 +55,7 @@
       });
       
       socket.on('GAME_CREATED', function(msg){
-        socket = io('/game/'+msg);
+        $('#messages').append($('<li>').text('GAME_CREATED'));
 
         socket.on('DEBUG', function(msg){
           $('#messages').append($('<li>').text('DEBUG MSG: '+msg));
@@ -64,6 +64,7 @@
 
         socket.emit('PLAYER_READY', playerID);
         $('#messages').append($('<li>').text('room '+msg+' joined'));
+      });
 
         socket.on('START_TURN', function(msg){
           $('#messages').append($('<li>').text(msg));
@@ -103,7 +104,6 @@
           $('#messages').append($('<li>').text("game over !!"));
           socket = io('/matchmaking');
         });
-      });
       
     </script>
   </body>

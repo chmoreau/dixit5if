@@ -30,10 +30,10 @@ function connect(io) {
                 // TODO notify the relevant players
                 var game = new Game(io, playerList);
                 playerList.forEach(function(element) {
-                    element.socket.join("lobby"+game.id);
+                    element.socket.join(game.room);
                 }, this);
 
-                io.in("lobby"+game.id).emit(Messages.GAME_CREATED, game.id);
+                io.in(game.room).emit(Messages.GAME_CREATED, game.id);
             }
 
             // Send the new queue size to the users
