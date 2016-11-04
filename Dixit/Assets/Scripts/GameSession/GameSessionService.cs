@@ -103,4 +103,9 @@ public class GameSessionService : MonoBehaviour
         m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers, currentPhase, handIds, theme, tableCardIds, VoteResult);
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)HandIds);
     }
+
+    public void JoinMatchMaking()
+    {
+        // Network.JoinMatchMaking()
+    }
 }
