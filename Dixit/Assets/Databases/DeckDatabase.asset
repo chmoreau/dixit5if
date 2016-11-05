@@ -16,11 +16,11 @@ MonoBehaviour:
     m_CardImage: {fileID: 2800000, guid: 269af002511dd754eb58663a8efa7174, type: 3}
   m_AllCards:
   - m_CardId: 1
-    m_CardImage: {fileID: 2800000, guid: 4f1f3a5a47fdccf4095195d16c0e4650, type: 3}
+    m_CardImage: {fileID: 2800000, guid: 7dfd4d98261294c488177a05f94ccf4f, type: 3}
   - m_CardId: 2
-    m_CardImage: {fileID: 2800000, guid: 9b85646264a7daf4db6fd4815e7929c4, type: 3}
+    m_CardImage: {fileID: 2800000, guid: 31054c6bec2b48f4c9da96f2d2f73264, type: 3}
   - m_CardId: 3
-    m_CardImage: {fileID: 2800000, guid: 5475f5fa89c5b7e4cbfa9d73374f4713, type: 3}
+    m_CardImage: {fileID: 2800000, guid: f43c28f88da05b44cbb24b8d4eb12cb8, type: 3}
   - m_CardId: 4
     m_CardImage: {fileID: 2800000, guid: cc13268f1d4c33f43ab31a7be794426a, type: 3}
   - m_CardId: 5
