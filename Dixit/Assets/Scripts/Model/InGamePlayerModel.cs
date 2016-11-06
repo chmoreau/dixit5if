@@ -39,7 +39,7 @@ public class InGamePlayerModel
         m_IsLocal = false;
         m_State = InGameState.Waiting;
         m_Score = 0;
-}
+    }
 
     public void AddPoints(int points)
     {
