@@ -2,7 +2,8 @@
 using UnityEngine.UI;
 using System.Collections;
 
-public class LoginView : MonoBehaviour {
+public class LoginView : MonoBehaviour
+{
     [SerializeField]
     private Animator m_MenuAnimator = null;
     [SerializeField]
@@ -27,7 +28,9 @@ public class LoginView : MonoBehaviour {
             return;
         }
 
-        //Network.LogIn(m_Username);
+        GameObject go = GameObject.Find("NetworkService");
+        Network network = (Network)go.GetComponent(typeof(Network));
+        network.UserName = m_Username;
         isLoggedIn = true;
     }
 
