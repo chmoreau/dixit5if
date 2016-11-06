@@ -4,9 +4,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 public class GameSessionService : MonoBehaviour
 {
+    [SerializeField]
+    private Animator m_CameraAnimator = null;
     [Header("Test")]
     public string SessionId = null;
     public InGamePlayerModel LocalPlayer = null;
@@ -25,6 +28,8 @@ public class GameSessionService : MonoBehaviour
             return m_CurrentGameSession;
         }
     }
+
+    private bool m_SessionDelayFlag = false;
 
     #region Test
     private void DestroySession()
@@ -82,8 +87,15 @@ public class GameSessionService : MonoBehaviour
         InGamePlayerModel[] otherPlayers = OtherPlayers; // test
         string[] initHandIds = HandIds; // test
 
+        StartCoroutine(CreateSessionCoroutine(sessionId, localPlayer, otherPlayers, initHandIds));        
+    }
+
+    private IEnumerator CreateSessionCoroutine(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, string[] initHandIds)
+    {
         m_CurrentGameSession = InstantiateSessionInstance();
-        m_CurrentGameSession.InitSession(SessionId, localPlayer, otherPlayers);
+        m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers);
+        m_CameraAnimator.SetBool("inGame", true);
+        yield return new WaitForSeconds(1);
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)initHandIds);
     }
 
@@ -99,13 +111,28 @@ public class GameSessionService : MonoBehaviour
         string theme = Theme; // test
         InGameCardModel[] tableCardIds = TableCardIds; // test
 
+        // todo : restoreSessionCoroutine
         m_CurrentGameSession = InstantiateSessionInstance();
         m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers, currentPhase, handIds, theme, tableCardIds, VoteResult);
-        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)HandIds);
+        m_CameraAnimator.SetBool("inGame", true);
+        //m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)HandIds);
     }
 
-    public void JoinMatchMaking()
+    public void EndSession()
     {
-        // Network.JoinMatchMaking()
+        if (m_CurrentGameSession == null) { return; }
+        StartCoroutine(EndSessionCoroutine());
+    }
+
+    private IEnumerator EndSessionCoroutine()
+    {
+        m_CameraAnimator.SetBool("inGame", false);
+        yield return new WaitForSeconds(1);
+        DestroyImmediate(m_CurrentGameSession.gameObject);
+    }
+
+    public void JoinMatchMaking(int playerNumber)
+    {
+        // Network.JoinMatchMaking(3)
     }
 }
