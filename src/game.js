@@ -1,5 +1,5 @@
 const STACK_SIZE = 20;
-const HAND_SIZE = 3;
+const HAND_SIZE = 6;
 
 var Match = require('./models/Match.js');
 var Turn = require('./models/Turn.js');
@@ -24,19 +24,22 @@ function Game(io, playerList) {
 Game.prototype.waitForPlayers = function(){
     var game = this;
     var ioPlayers = new IOPlayer(this.io, this.room, this.playerList);
+    var names ='';
     
     /** PLAYER READY */
     // we don't prevent players when another player is ready'
-    ioPlayers.receiveMsg(Messages.PLAYER_READY, function(playerID){
-        var name = playerID.name;
-        console.log('player ' + playerID + ' is ready');
+    ioPlayers.receiveMsg(Messages.PLAYER_READY, function(data){
+        console.log('player ' + data  + ' is ready');
         game.playerList.find(function(player, index, array) {
-            if(player.playerId === playerID){
+            if(player.playerId === data ){
                 player.ready = true;
+                names = names+data+' ';
             };
         });
         if(allPlayerReady(game.playerList)){
             console.log('Everyone is ready');
+
+            ioPlayers.sendToAll("INFO_PLAYERS", {names : names} );
             game.playGame(ioPlayers);                
         }
     });
@@ -46,6 +49,7 @@ Game.prototype.waitForPlayers = function(){
 }
 
 Game.prototype.playGame = function(ioPlayers){
+
     this.match = createMatch(this.playerList);
     this.newTurn(ioPlayers);
 }
@@ -348,7 +352,9 @@ function sendStartTurn(game, ioPlayers){
             return playerInfo.playerId === player.id;
         });
         newTurn.narrator = game.match.turn.narrator;
-        ioPlayers.sendToPlayer(playerInfo.playerId, Messages.START_TURN, {turn : newTurn});
+         newTurn.hand = newTurn.hand.toString();
+        console.log(newTurn);
+        ioPlayers.sendToPlayer(playerInfo.playerId, Messages.START_TURN,  newTurn);
 
     })
     console.log('start turn information sent');

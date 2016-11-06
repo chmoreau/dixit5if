@@ -16,7 +16,7 @@ function connect(io) {
 
         socket.on(Messages.JOIN_MATCHMAKING, function(msg) {
 
-            var player = { playerId: msg.playerId, socket: socket };
+            var player = { playerId: msg.playerID, socket: socket };
 
             // Add the user to the queue
             queue.unshift(player);

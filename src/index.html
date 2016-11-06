@@ -16,7 +16,7 @@
   <body>
     <ul id="messages"></ul>
 
-    <input id="player" autofocus/><button id="playerId">playerID</button>
+    <input id="player" autofocus/><button id="playerID">playerID</button>
     </br></br>
     <input id="theme"/><button id="sendTheme">send theme</button>
     </br></br>
@@ -30,9 +30,10 @@
       var socket = io('');
       var playerID;
 
-      $("#playerId").click(function(){
+      $("#playerID").click(function(){
         socket.emit('JOIN_MATCHMAKING', {playerID : $('#player').val()});
         playerID = $('#player').val();
+        console.log(playerID);
         return false;
       });
 
@@ -62,14 +63,14 @@
           socket.emit('DEBUG', 'DEBUG REPLY');
         });
         
-        socket.emit('PLAYER_READY', {name : playerID, lala : "lala"});
+        socket.emit('PLAYER_READY', {playerID : playerID, lala : "lala"});
 
         $('#messages').append($('<li>').text('room '+msg.gameID+' joined'));
       });
 
         socket.on('START_TURN', function(msg){
           $('#messages').append($('<li>').text("start turn"));
-          $('#messages').append($('<li>').text("narrator : " + msg.turn.narrator));
+          $('#messages').append($('<li>').text("narrator : " + msg.narrator));
         });
 
         socket.on('THEME', function(msg){
