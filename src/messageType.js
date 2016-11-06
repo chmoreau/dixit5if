@@ -8,7 +8,7 @@ module.exports = Object.freeze({
     THEME: 'THEME',
     PLAY_CARD: 'PLAY_CARD',
     CARD_PLAYED: 'CARD_PLAYED',
-    REVEAL_CARD: 'REVEAL_CARD',
+    REVEAL_CARDS: 'REVEAL_CARDS',
     PICK_CARD: 'PICK_CARD',
     CARD_PICKED: 'CARD_PICKED',
     TRICK: 'TRICK',

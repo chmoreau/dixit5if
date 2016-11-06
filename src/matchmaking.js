@@ -16,7 +16,7 @@ function connect(io) {
 
         socket.on(Messages.JOIN_MATCHMAKING, function(msg) {
 
-            var player = { playerId: msg.playerID, socket: socket };
+            var player = { playerId: msg.playerId, socket: socket };
 
             // Add the user to the queue
             queue.unshift(player);
@@ -40,7 +40,7 @@ function connect(io) {
             io.emit(Messages.QUEUE_SIZE, {queueLength:queue.length});
         });
 
-        socket.on('disconnect', function() {
+        socket.on('Disconnect', function() {
             // Find the disconnected player from his socket id
             var discPlayer = queue.find(function(element, index, array) {
                 return socket.id === element.socket.id;

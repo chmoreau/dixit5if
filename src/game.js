@@ -28,6 +28,7 @@ Game.prototype.waitForPlayers = function(){
     /** PLAYER READY */
     // we don't prevent players when another player is ready'
     ioPlayers.receiveMsg(Messages.PLAYER_READY, function(playerID){
+        var name = playerID.name;
         console.log('player ' + playerID + ' is ready');
         game.playerList.find(function(player, index, array) {
             if(player.playerId === playerID){
