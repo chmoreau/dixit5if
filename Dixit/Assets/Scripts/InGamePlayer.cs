@@ -40,6 +40,7 @@ public class InGamePlayer : MonoBehaviour {
     {
         onNicknameUpdate.Invoke(m_PlayerModel.Nickname);
         StateView stateView = m_StateViews.First(s => s.State == m_PlayerModel.State);
+        //StateView stateView = new StateView(); 
         onStateColorUpdate.Invoke(stateView.Color);
         onStateTextUpdate.Invoke(stateView.Text);
         onScoreUpdate.Invoke(m_PlayerModel.Score.ToString());
