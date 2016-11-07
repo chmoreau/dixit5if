@@ -53,7 +53,7 @@ public class GameSessionService : MonoBehaviour
 
     public void TestOtherPlayerPlayCard(string playerId)
     {
-        m_CurrentGameSession.PutOtherPlayerPlayerCard(playerId);
+        m_CurrentGameSession.PutOtherPlayerPlayedCard(playerId);
     }
 
     public void TestToPickCardPhase()

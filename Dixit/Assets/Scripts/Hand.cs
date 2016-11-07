@@ -55,7 +55,8 @@ public class Hand : MonoBehaviour {
                 Ray ray = Camera.main.ScreenPointToRay(Input.touches[0].position);
 #endif
                 RaycastHit hit;
-                if (Physics.Raycast(ray, out hit, 20) && hit.collider.Equals(m_PlayCardArea))
+                LayerMask mask = (1 << LayerMask.NameToLayer("Play"));
+                if (Physics.Raycast(ray, out hit, 20, mask) && hit.collider.Equals(m_PlayCardArea))
                 {
                     if (m_IsPlayable)
                     {
@@ -151,7 +152,7 @@ public class Hand : MonoBehaviour {
 
     public void RestoreFocus()
     {
-        if (!m_IsInteractable) { return; }
+        //if (!m_IsInteractable) { return; }
 
         if (m_ZoomCoroutine == null && m_SelectedCardIndex != -1)
         {

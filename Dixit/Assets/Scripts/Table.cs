@@ -14,22 +14,23 @@ public class Table : MonoBehaviour {
     private GameObject m_ThemeInputPanel = null;
     [SerializeField]
     private Text m_StorytellerName = null;
+    [SerializeField]
+    private Collider m_PickCardArea = null;
     [Header("Animations")]
     [SerializeField]
-    private float m_ShuffleDuration = 1.0f;
+    private float m_ShuffleDuration = 0.4f;
     [SerializeField]
-    private float m_ShuffleInterval = 0.8f;
+    private float m_ShuffleInterval = 0.3f;
     [SerializeField]
-    private float m_ShufflePause = 0.3f;
+    private float m_ShufflePause = 0.1f;
     [SerializeField]
-    private float m_DisplayDuration = 1.0f;
+    private float m_DisplayDuration = 1.2f;
     [SerializeField]
-    private float m_DisplayInterval = 0.8f;
+    private float m_DisplayInterval = 0.9f;
     [SerializeField]
-    private float m_ReturnDuration = 1.0f;
-
+    private float m_ReturnDuration = 0.6f;
     [SerializeField]
-    private float m_ZoomDuration = 0.5f;
+    private float m_ZoomDuration = 0.4f;
     [Header("Anchors")]
     [SerializeField]
     private Transform m_ShuffleSpotPoint = null;
@@ -44,6 +45,32 @@ public class Table : MonoBehaviour {
     private bool m_IsInteractable = false;
     public bool SetInteractable { set { m_IsInteractable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
+
+    void Update()
+    {
+        if (m_IsInteractable)
+        {
+            if (m_ZoomCoroutine != null || m_SelectedCardIndex == -1) { return; }
+#if UNITY_EDITOR
+            if (Input.GetMouseButtonDown(0))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Debug.DrawRay(ray.origin, ray.direction * 20, Color.yellow);
+#elif UNITY_IOS || UNITY_ANDROID                
+            if (Input.touchCount == 1)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.touches[0].position);
+#endif
+                RaycastHit hit;
+                LayerMask mask = (1 << LayerMask.NameToLayer("Pick"));
+                if (Physics.Raycast(ray, out hit, 20, mask) && hit.collider.Equals(m_PickCardArea))
+                {
+                    PickCard();
+                }
+                RestoreFocus();
+            }
+        }
+    }
 
     public void Init(int slotNumber, string storytellerName = null, string theme = null, InGameCardModel[] tableCards = null, bool isFaceUp = false, bool isInteractable = false, string[] voteResult = null)
     {
@@ -87,12 +114,24 @@ public class Table : MonoBehaviour {
         m_StorytellerName.text = null;
         foreach (CardSlot slot in m_CardSlots)
         {
-            if (slot.Card != null)
-            {
-                Destroy(slot.Card.gameObject);
-            }
             Destroy(slot.gameObject);
         }
+    }
+
+    public void Clear()
+    {
+        StopAllCoroutines();
+
+        m_SelectedCardIndex = -1;
+        m_ThemeInputPanel.SetActive(false);
+        m_Theme.text = null;
+        m_StorytellerName.text = null;
+        foreach (CardSlot slot in m_CardSlots)
+        {
+            slot.Clear();
+        }
+        m_SlotPointer = 0;
+        m_IsInteractable = false;
     }
 
     public CardSlot AllocateSlot()
@@ -166,7 +205,7 @@ public class Table : MonoBehaviour {
             yield return new WaitForSeconds(m_DisplayInterval);
         }
 
-        m_IsInteractable = true;
+        m_IsInteractable = !GameSessionService.CurrentGameSession.LocalPlayer.IsStoryteller;
     }
 
     // Out of the coroutine body to avoid the scope issue of local variables :(
@@ -198,7 +237,7 @@ public class Table : MonoBehaviour {
 
     public void RestoreFocus()
     {
-        if (!m_IsInteractable) { return; }
+        //if (!m_IsInteractable) { return; }
 
         if (m_ZoomCoroutine == null && m_SelectedCardIndex != -1)
         {
@@ -212,5 +251,14 @@ public class Table : MonoBehaviour {
             m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_DisplayTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
             StartCoroutine(m_ZoomCoroutine);
         }
+    }
+
+    private void PickCard()
+    {
+        //Register card play to game server
+        if (!GameSessionService.CurrentGameSession.PickCard(m_CardSlots[m_SelectedCardIndex].Card.CardId)) { return; }
+
+        m_IsInteractable = false;
+        m_CardSlots[m_SelectedCardIndex].AddVoter(GameSessionService.CurrentGameSession.LocalPlayer.UserId);
     }
 }
