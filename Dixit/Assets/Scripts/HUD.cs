@@ -39,4 +39,9 @@ public class HUD : MonoBehaviour {
         NextButton.interactable = isEnabled;
         NextButton.gameObject.SetActive(isEnabled);
     }
+
+    public void SetNextButtonInteractable(bool isInteractable)
+    {
+        NextButton.interactable = isInteractable;
+    }
 }

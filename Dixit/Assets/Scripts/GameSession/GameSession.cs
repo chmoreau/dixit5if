@@ -146,7 +146,7 @@ public class GameSession : MonoBehaviour
                 }
                 else if (targetPhase == Phase.EndSession)
                 {
-                    HUD.EnableNextButton(false);
+                    HUD.SetNextButtonInteractable(false);
                     HUD.Instruction.text = string.Format(INSTRUCTION_ENDSESSION, m_RoundCounter);
                     m_CurrentPhase = Phase.EndSession;
                 }
