@@ -80,6 +80,19 @@ public class GameSessionService : MonoBehaviour
         }
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ShowScore, (object)CardResults, (object)dic);
     }
+
+    public void TestOtherPlayerReadyForNext(string playerId)
+    {
+        m_CurrentGameSession.MarkOtherPlayerReadyForNext(playerId);
+    }
+
+    public void TestToNexrDrawCardPhase()
+    {
+        string[] newHands = { "4" };
+        string newNarrator = "testid_local";
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)newHands);
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, (object)newNarrator);
+    }
     #endregion
 
     public void FetchAllSessionSketchs()

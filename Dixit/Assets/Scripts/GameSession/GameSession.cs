@@ -84,7 +84,7 @@ public class GameSession : MonoBehaviour
                     HUD.Instruction.text = INSTRUCTION_DRAWHAND;
                     m_CurrentPhase = Phase.DrawHand;
                     DrawHand((string[])args[0]);
-                    HUD.InGamePlayerList.ForceAllViewsUpdate();
+                    //HUD.InGamePlayerList.ForceAllViewsUpdate();
                 }
                 break;
             case Phase.DrawHand :
@@ -126,9 +126,19 @@ public class GameSession : MonoBehaviour
                     // args[0] => InGameCardModel[] cardResults : cardId, ownerId, isThemeCard
                     // args[1] => Dictionary<string, DataPair<string, int>> playerResults : playerId, <votedCardId, playerNewScore>
                     ProcessResults((InGameCardModel[])args[0], (Dictionary<string, DataPair<string, int>>)args[1]);
+                    HUD.EnableNextButton(true);
                 }
                 break;
             case Phase.ShowScore :
+                if (targetPhase == Phase.DrawHand)
+                {
+                    InitAllPlayersState();
+                    HUD.EnableNextButton(false);
+                    Table.Clear();
+                    HUD.Instruction.text = INSTRUCTION_DRAWHAND;
+                    m_CurrentPhase = Phase.DrawHand;
+                    DrawHand((string[])args[0]);
+                }
                 break;
         }
     }
@@ -337,6 +347,24 @@ public class GameSession : MonoBehaviour
             HUD.InGamePlayerList.UpdateScore(playerResult.Key, playerResult.Value.Value2);
             GetPlayer(playerResult.Key).Score = playerResult.Value.Value2;
         }
+    }
+
+    public void ReadyForNextRound()
+    {
+        if (m_CurrentPhase != Phase.ShowScore) { return; }
+        // todo : Network api
+        // all players ready before server send next round data!
+        // Network.ReadyForNext();
+
+        LocalPlayer.State = InGamePlayerModel.InGameState.Done;
+        HUD.InGamePlayerList.ForcePlayerViewUpdate(LocalPlayer.UserId);
+    }
+
+    public void MarkOtherPlayerReadyForNext(string playerId)
+    {
+        if (m_CurrentPhase != Phase.ShowScore) { return; }
+
+        UpdateOtherPlayerState(playerId, InGamePlayerModel.InGameState.Done);
     }
 
     public void UpdateOtherPlayerState(string playerId, InGamePlayerModel.InGameState newState)

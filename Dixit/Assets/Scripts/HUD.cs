@@ -6,6 +6,7 @@ public class HUD : MonoBehaviour {
     public Text Instruction = null;
     public InGamePlayerList InGamePlayerList = null;
     public GameObject OptionsContent = null;
+    public Button NextButton = null;
 
     public void Init()
     {
@@ -13,6 +14,7 @@ public class HUD : MonoBehaviour {
         InGamePlayerList.Init();
         InGamePlayerList.SetVisibile();
         Instruction.text = GameSession.INSTRUCTION_INITSESSION;
+        NextButton.onClick.AddListener(() => { GameSessionService.CurrentGameSession.ReadyForNextRound(); });
     }
 
     public void Reset()
@@ -29,5 +31,11 @@ public class HUD : MonoBehaviour {
     public void ChangeOptionsVisibility()
     {
         OptionsContent.SetActive(!OptionsContent.activeSelf);
+    }
+
+    public void EnableNextButton(bool isEnabled)
+    {
+        NextButton.interactable = isEnabled;
+        NextButton.gameObject.SetActive(isEnabled);
     }
 }
