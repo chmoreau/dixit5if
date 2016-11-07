@@ -12,6 +12,7 @@ module.exports = Object.freeze({
     PICK_CARD: 'PICK_CARD',
     CARD_PICKED: 'CARD_PICKED',
     TRICK: 'TRICK',
+    READY_FOR_NEXT: 'READY_FOR_NEXT',
     NEW_TURN: 'NEW_TURN',
     GAME_OVER: 'GAME_OVER',
     CONTEXT: 'CONTEXT',

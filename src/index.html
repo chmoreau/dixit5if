@@ -100,6 +100,7 @@
 
         socket.on('NEW_TURN', function(msg){
           $('#messages').append($('<li>').text("new turn"));
+          socket.emit('READY_FOR_NEXT');
         });
 
         socket.on('GAME_OVER', function(msg){

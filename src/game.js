@@ -21,6 +21,16 @@ function Game(io, playerList) {
     this.waitForPlayers();
 };
 
+function function1() {
+    // stuff you want to happen right away
+    console.log('Welcome to My Console,');
+}
+
+function function2() {
+    // all the stuff you want to happen after that pause
+    console.log('Blah blah blah blah extra-blah');
+}
+
 Game.prototype.waitForPlayers = function () {
     var game = this;
     var ioPlayers = new IOPlayer(this.io, this.room, this.playerList);
@@ -59,7 +69,6 @@ Game.prototype.newTurn = function (ioPlayers) {
     this.match.turn = new Turn();
     distributeCards(this.match);
     electNarrator(this.match);
-
     // Send new turn infos
     sendStartTurn(this, ioPlayers);
 
@@ -145,6 +154,7 @@ Game.prototype.newTurn = function (ioPlayers) {
                 updatePlayersScores(match);
                 console.log("players' scores updated");
                 var scores = getScores(match.players);
+                var aux = 0;
                 if (match.stack.length < match.players.length && match.players[0].hand.length === 0) {
                     /**GAME_OVER */
                     scores.forEach(function(Element) {
@@ -156,7 +166,14 @@ Game.prototype.newTurn = function (ioPlayers) {
                      scores.forEach(function(Element) {
                         ioPlayers.sendToAll(Messages.NEW_TURN,  Element );
                     });
-                    game.newTurn(ioPlayers);
+                    ioPlayers.receiveMsg(Messages.READY_FOR_NEXT, function() {
+                        aux++;
+                        console.log(aux + " " + match.players.length);
+                        if(aux == match.players.length) {
+                            game.newTurn(ioPlayers);
+                        }
+                    });
+                 
                 }
 
             }
