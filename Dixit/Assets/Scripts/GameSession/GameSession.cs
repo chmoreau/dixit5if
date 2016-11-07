@@ -82,6 +82,11 @@ public class GameSession : MonoBehaviour
             case Phase.DrawHand :
                 if (targetPhase == Phase.ChooseTheme)
                 {
+                    string storyTeller = (string)args[0];
+                    if (storyTeller == m_LocalPlayer.Nickname)
+                        HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_STORYTELLER;
+                    else
+                        HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_OTHERS;
                     m_CurrentPhase = Phase.ChooseTheme;
                     SetStoryteller((string)args[0]);
                 }
@@ -89,6 +94,7 @@ public class GameSession : MonoBehaviour
             case Phase.ChooseTheme:
                 if (targetPhase == Phase.PlayCard)
                 {
+                    HUD.Instruction.text = INSTRUCTION_PLAYCARD;
                     m_CurrentPhase = Phase.PlayCard;
                     Hand.SetPlayable = true;
                     InitAllPlayersState();
@@ -165,7 +171,7 @@ public class GameSession : MonoBehaviour
         }
     }    
 
-    public void SetStoryteller(string storytellerId)
+    public void SetStoryteller(string storytellerId, string theme="")
     {
         if (m_LocalPlayer.UserId == storytellerId)
         {
@@ -184,7 +190,9 @@ public class GameSession : MonoBehaviour
                     HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_OTHERS;
                     otherPlayer.IsStoryteller = true;
                     otherPlayer.State = InGamePlayerModel.InGameState.Waiting;
+                    Table.SetTheme(theme);
                     Table.SetStorytellerName(otherPlayer.Nickname);
+                       
                 }
                 else
                 {

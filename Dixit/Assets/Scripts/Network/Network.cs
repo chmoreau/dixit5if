@@ -10,6 +10,7 @@ public class Network : MonoBehaviour
     public GameObject go;
     private IEnumerator update;
     private bool first_turn = true;
+    private string storyTeller;
 
     public string UserName;
 
@@ -33,7 +34,6 @@ public class Network : MonoBehaviour
         socket.On("GAME_OVER", GameOver);
 
         JSONObject obj = new JSONObject();
-        StartCoroutine(update);
     }
 
     public void GameCreated(SocketIOEvent e)
@@ -112,7 +112,7 @@ public class Network : MonoBehaviour
             List<string> keyList = new List<string>(data.Keys);
             string narrator = data["narrator"];
             string hand = data["hand"];
-           
+            storyTeller = narrator;
 
             List<string> cards = new List<string>();
             string aux = "";
@@ -143,7 +143,14 @@ public class Network : MonoBehaviour
     public void ReceiveTheme(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
-
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string theme = data["theme"];
+        GameObject go = GameObject.Find("Table");
+        Table table = (Table)go.GetComponent(typeof(Table));
+        table.SetTheme(theme);
+        go = GameObject.Find("GameSessionService");
+        GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        gameSession.playCard();
     }
 
     public void CardPlayed(SocketIOEvent e)

@@ -101,6 +101,17 @@ public class GameSessionService : MonoBehaviour
         m_CurrentGameSession.SetStoryteller(storyTeller);
     }
 
+    public void pickCard()
+    {
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.PickCard);
+    }
+
+    public void playCard()
+    {
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.PlayCard);
+    }
+
+
     public void RestoreSession(string sessionId)
     {
         // todo : network api
