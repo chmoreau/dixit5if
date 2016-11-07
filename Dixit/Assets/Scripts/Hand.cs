@@ -25,9 +25,11 @@ public class Hand : MonoBehaviour {
     [SerializeField]
     private Transform m_ZoomTargetPoint = null;
     [SerializeField]
-    private float m_ZoomDuration = 0.5f;
+    private Collider m_PlayCardArea = null;
     [SerializeField]
-    private float m_PlayDuration = 0.5f;
+    private float m_ZoomDuration = 0.3f;
+    [SerializeField]
+    private float m_PlayDuration = 0.4f;
     
     private int m_SelectedCardIndex = -1;
     private bool m_IsInteractable = false;
@@ -35,7 +37,39 @@ public class Hand : MonoBehaviour {
     private bool m_IsPlayable = false;
     public bool SetPlayable { set { m_IsPlayable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
-   
+
+    void Update()
+    {
+        if (m_IsInteractable)
+        {
+            //if (m_IsDrawing) { return; }
+            if (m_ZoomCoroutine != null || m_SelectedCardIndex == -1) { return; }
+#if UNITY_EDITOR
+            if (Input.GetMouseButtonDown(0))
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                Debug.DrawRay(ray.origin, ray.direction * 20, Color.yellow);
+#elif UNITY_IOS || UNITY_ANDROID                
+            if (Input.touchCount == 1)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(Input.touches[0].position);
+#endif
+                RaycastHit hit;
+                if (Physics.Raycast(ray, out hit, 20) && hit.collider.Equals(m_PlayCardArea))
+                {
+                    if (m_IsPlayable)
+                    {
+                        PlayCard();
+                    }
+                }
+                else
+                {
+                    RestoreFocus();
+                }
+            }
+        }
+    }
+
     public void Init(string[] handIds = null, bool isInteractable = false, bool isPlayable = false)
     {
         if (handIds == null)
@@ -48,7 +82,7 @@ public class Hand : MonoBehaviour {
             m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
         }
 
-        m_IsDrawing = false;
+        //m_IsDrawing = false;
         m_IsInteractable = isInteractable;
         m_IsPlayable = isPlayable;
     }
@@ -74,10 +108,10 @@ public class Hand : MonoBehaviour {
         StartCoroutine("DrawHand", cardIds);
     }
 
-    private bool m_IsDrawing = false;
+    //private bool m_IsDrawing = false;
     IEnumerator DrawHand(string[] cardIds)
     {
-        m_IsDrawing = true;
+        m_IsInteractable = false;
 
         foreach (CardSlot slot in m_CardSlots)
         {
@@ -91,11 +125,11 @@ public class Hand : MonoBehaviour {
             if (slot.Card == null)
             {
                 GameSessionService.CurrentGameSession.DrawCardFromDeck(cardIds[k++], slot);
-                yield return new WaitForSeconds(0.8f);
+                yield return new WaitForSeconds(0.4f);
             }
         }
 
-        m_IsDrawing = false;
+        m_IsInteractable = true;
     }
 
     public void FocusOnCard(int cardIndex)
@@ -133,12 +167,8 @@ public class Hand : MonoBehaviour {
         }     
     }
 
-    public void PlayCard()
+    private void PlayCard()
     {
-        if (!m_IsInteractable || !m_IsPlayable) { return; }
-        if (m_IsDrawing) { return; }
-        if (m_ZoomCoroutine != null || m_SelectedCardIndex == -1) { return; }
-
         CardSlot targetSlot = GameSessionService.CurrentGameSession.AllocateTableSlot();
         if (targetSlot != null)
         {

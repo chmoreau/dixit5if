@@ -19,7 +19,7 @@ public class GameSession : MonoBehaviour
 
     public const string INSTRUCTION_INITSESSION = "Attendez l'initalisation de la partie du jeu";
     public const string INSTRUCTION_DRAWHAND = "Piocher les cartes jusqu'à une main de six cartes";
-    public const string INSTRUCTION_CHOOSETHEME_STORYTELLER = "PhaseVous etes le conteur de ce tour, écrivez le thème du tour";
+    public const string INSTRUCTION_CHOOSETHEME_STORYTELLER = "Vous etes le conteur de ce tour, écrivez le thème du tour";
     public const string INSTRUCTION_CHOOSETHEME_OTHERS = "Attendez que le thème soit choisi par le conteur";
     public const string INSTRUCTION_PLAYCARD = "Choisissez une carte qui vous fait penser au thème";
     public const string INSTRUCTION_PICKCARD = "Votez pour la carte que vous pensez etre celle du conteur";
@@ -74,27 +74,40 @@ public class GameSession : MonoBehaviour
             case Phase.InitSession :
                 if (targetPhase == Phase.DrawHand)
                 {
+                    InitAllPlayersState();
                     HUD.Instruction.text = INSTRUCTION_DRAWHAND;
                     m_CurrentPhase = Phase.DrawHand;
                     DrawHand((string[])args[0]);
+                    HUD.InGamePlayerList.ForceAllViewsUpdate();
                 }
                 break;
             case Phase.DrawHand :
                 if (targetPhase == Phase.ChooseTheme)
                 {
+                    InitAllPlayersState();
                     m_CurrentPhase = Phase.ChooseTheme;
+                    //Hand.SetInteractable = true;
                     SetStoryteller((string)args[0]);
+                    HUD.InGamePlayerList.ForceAllViewsUpdate();
                 }
                 break;
             case Phase.ChooseTheme:
                 if (targetPhase == Phase.PlayCard)
                 {
+                    InitAllPlayersState();
+                    HUD.Instruction.text = INSTRUCTION_PLAYCARD;
                     m_CurrentPhase = Phase.PlayCard;
                     Hand.SetPlayable = true;
-                    InitAllPlayersState();
                 }
                 break;
             case Phase.PlayCard :
+                if (targetPhase == Phase.PickCard)
+                {
+                    InitAllPlayersState();
+                    HUD.Instruction.text = INSTRUCTION_PICKCARD;
+                    m_CurrentPhase = Phase.PickCard;
+                    Table.ShuffleAndRevealCards((string[])args[0]);
+                }
                 break;
             case Phase.PickCard :
                 break;
@@ -110,6 +123,7 @@ public class GameSession : MonoBehaviour
         {
             otherPlayer.State = InGamePlayerModel.InGameState.Waiting;
         }
+        HUD.InGamePlayerList.ForceAllViewsUpdate();
     }
 
     public void InitSession(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, Phase currentPhase = Phase.InitSession, string[] handIds = null, string theme = null, InGameCardModel[] tableCards = null, string[] voteResult = null)
@@ -171,24 +185,24 @@ public class GameSession : MonoBehaviour
         {
             HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_STORYTELLER;
             m_LocalPlayer.IsStoryteller = true;
-            m_LocalPlayer.State = InGamePlayerModel.InGameState.Waiting;
             Table.SetStorytellerName(m_LocalPlayer.Nickname);
             Table.EnableThemeInput();
-        } else
+        }
+        else
         {
-            foreach (InGamePlayerModel otherPlayer in m_OtherPlayers)
+            m_LocalPlayer.State = InGamePlayerModel.InGameState.Done;
+        }
+        foreach (InGamePlayerModel otherPlayer in m_OtherPlayers)
+        {
+            if (otherPlayer.UserId == storytellerId)
             {
-                if (otherPlayer.UserId == storytellerId)
-                {
-                    HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_OTHERS;
-                    otherPlayer.IsStoryteller = true;
-                    otherPlayer.State = InGamePlayerModel.InGameState.Waiting;
-                    Table.SetStorytellerName(otherPlayer.Nickname);
-                }
-                else
-                {
-                    otherPlayer.State = InGamePlayerModel.InGameState.Done;
-                }
+                HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_OTHERS;
+                otherPlayer.IsStoryteller = true;
+                Table.SetStorytellerName(otherPlayer.Nickname);
+            }
+            else
+            {
+                otherPlayer.State = InGamePlayerModel.InGameState.Done;
             }
         }
     }
@@ -196,7 +210,7 @@ public class GameSession : MonoBehaviour
     private void DrawHand(string[] cardIds)
     {
         Hand.Draw(cardIds);
-        Hand.SetInteractable = true;
+        //Hand.SetInteractable = true;
     }
 
     public void DrawCardFromDeck(string cardId, CardSlot targetSlot)
@@ -217,22 +231,47 @@ public class GameSession : MonoBehaviour
     public bool ConfirmTheme(string theme)
     {
         if (!m_LocalPlayer.IsStoryteller || m_CurrentPhase != Phase.ChooseTheme) { return false; }
-        //todo : network api
-        //return Network.ConfirmTheme(currentSessionId, theme);
-        return true;
-    }
-
-    public bool PlayCard(string cardId)
-    {
-        if (m_CurrentPhase != Phase.PlayCard) { return false; }
-        //todo : network api
-        //return Network.PlayCard(currentSessionId, localPlayerId, cardId);
+        //network api
+        FindObjectOfType<Network>().ConfirmTheme(theme);
         if (true)
         {
             m_LocalPlayer.State = InGamePlayerModel.InGameState.Done;
             HUD.InGamePlayerList.ForcePlayerViewUpdate(m_LocalPlayer.UserId);
         }
         return true;
+    }
+
+    public void SetTheme(string theme)
+    {
+        if (m_CurrentPhase != Phase.ChooseTheme) { return; }
+
+        Table.SetTheme(theme);
+        if (Storyteller != m_LocalPlayer)
+        {
+            UpdateOtherPlayerState(Storyteller.UserId, InGamePlayerModel.InGameState.Done);
+        }
+    }
+
+    public bool PlayCard(string cardId)
+    {
+        if (m_CurrentPhase != Phase.PlayCard) { return false; }
+        //network api
+        FindObjectOfType<Network>().PlayCard(cardId);
+        if (true)
+        {
+            m_LocalPlayer.State = InGamePlayerModel.InGameState.Done;
+            HUD.InGamePlayerList.ForcePlayerViewUpdate(m_LocalPlayer.UserId);
+        }
+        return true;
+    }
+
+    public void PutOtherPlayerPlayerCard(string playerId)
+    {
+        if (m_CurrentPhase != Phase.PlayCard) { return; }
+
+        if (m_OtherPlayers.FirstOrDefault(p => p.UserId == playerId).State == InGamePlayerModel.InGameState.Done) { return; }
+        Table.PutOtherPlayerPlayedCard(playerId);
+        UpdateOtherPlayerState(playerId, InGamePlayerModel.InGameState.Done);
     }
 
     public void UpdateOtherPlayerState(string playerId, InGamePlayerModel.InGameState newState)

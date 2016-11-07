@@ -4,8 +4,12 @@ using System.Collections;
 
 public class MatchMakingView : MonoBehaviour
 {
+    private const string TIME_FORMAT = "{0}:{1}:{2}";
+
     [SerializeField]
     private Animator m_MenuAnimator = null;
+    [SerializeField]
+    private Text m_TickingDisplay = null;
     [SerializeField]
     private Animator[] m_PlayerIconAnimator = new Animator[6];
     private string m_Username = string.Empty;
@@ -34,8 +38,18 @@ public class MatchMakingView : MonoBehaviour
         }
     }
 
-    void update()
+    private IEnumerator Tick()
     {
+        float timer = 0f;
+        while (true)
+        {
+            int hours = (int)timer / 3600;
+            int minutes = ((int)timer % 3600) / 60;
+            int seconds = (int)timer % 60;
+            m_TickingDisplay.text = string.Format(TIME_FORMAT, hours.ToString("0"), minutes.ToString("00"), seconds.ToString("00"));
+            yield return new WaitForEndOfFrame();
+            timer += Time.deltaTime;
+        }
     }
 
     public void JoinMatchMaking()
@@ -43,6 +57,7 @@ public class MatchMakingView : MonoBehaviour
         GameObject go = GameObject.Find("NetworkService");
         Network network = (Network)go.GetComponent(typeof(Network));
         network.JoinMatchmaking();
+        StartCoroutine(Tick());
     }
 
     public void StopMatchMaking()
@@ -52,5 +67,6 @@ public class MatchMakingView : MonoBehaviour
         Network network = (Network)go.GetComponent(typeof(Network));
         network.Disconnect();
         m_MenuAnimator.SetTrigger("toMainMenu");
+        StopCoroutine(Tick());
     }
 }

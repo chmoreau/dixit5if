@@ -133,6 +133,21 @@ public class Table : MonoBehaviour {
         m_ThemeInputPanel.SetActive(true);
     }    
 
+    public void PutOtherPlayerPlayedCard(string playerId)
+    {
+        CardSlot slot = AllocateSlot();
+        if (slot)
+        {
+            slot.Card = GameSessionService.CurrentGameSession.InstantiateCard(null, playerId, slot.FaceDownAnchor);
+            slot.Card.transform.SetParent(slot.transform);
+        }
+    }
+
+    public void ShuffleAndRevealCards(string[] cardIds)
+    {
+        StartCoroutine(ShuffleAndDisplayCards(cardIds));
+    }
+
     public IEnumerator ShuffleAndDisplayCards(string[] cardIds)
     {
         for (int i = 0; i < cardIds.Length; i++)

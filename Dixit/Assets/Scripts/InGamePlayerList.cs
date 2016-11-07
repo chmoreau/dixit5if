@@ -47,6 +47,14 @@ public class InGamePlayerList : MonoBehaviour {
         }
     }
 
+    public void ForceAllViewsUpdate()
+    {
+        foreach (InGamePlayer player in m_PlayerList.Values)
+        {
+            player.UpdateView();
+        }
+    }
+
     public void ForcePlayerViewUpdate(string playerId)
     {
         m_PlayerList[playerId].UpdateView();

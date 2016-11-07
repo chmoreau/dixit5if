@@ -14,10 +14,12 @@ public class GameSessionService : MonoBehaviour
     public string SessionId = null;
     public InGamePlayerModel LocalPlayer = null;
     public InGamePlayerModel[] OtherPlayers = null;
+    public string NarratorId = null;
     public GameSession.Phase Phase = GameSession.Phase.InitSession;
     public string[] HandIds = null;
     public string Theme = null;
     public InGameCardModel[] TableCardIds = null;
+    public string[] PlayedCardIds = null;
     public string[] VoteResult = null;
 
     private static GameSession m_CurrentGameSession = null;
@@ -28,8 +30,6 @@ public class GameSessionService : MonoBehaviour
             return m_CurrentGameSession;
         }
     }
-
-    private bool m_SessionDelayFlag = false;
 
     #region Test
     private void DestroySession()
@@ -46,18 +46,19 @@ public class GameSessionService : MonoBehaviour
         CreateSession();
     }
 
-    public void TestPlayPhase()
+    public void TestToPlayCardPhase()
     {
-        DestroySession();
-
-        m_CurrentGameSession = InstantiateSessionInstance();
-        LocalPlayer.State = InGamePlayerModel.InGameState.Waiting;
-        m_CurrentGameSession.InitSession(SessionId, LocalPlayer, OtherPlayers, GameSession.Phase.PlayCard, HandIds, "test_theme_abc");
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.PlayCard);
     }
 
-    public void TestUpdatePlayerState(string playerId)//, InGamePlayerModel.InGameState state = InGamePlayerModel.InGameState.Done)
+    public void TestOtherPlayerPlayCard(string playerId)
     {
-        m_CurrentGameSession.UpdateOtherPlayerState(playerId, InGamePlayerModel.InGameState.Done);
+        m_CurrentGameSession.PutOtherPlayerPlayerCard(playerId);
+    }
+
+    public void TestToPickCardPhase()
+    {
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.PickCard, (object)PlayedCardIds);
     }
     #endregion
 
@@ -97,6 +98,7 @@ public class GameSessionService : MonoBehaviour
         m_CameraAnimator.SetBool("inGame", true);
         yield return new WaitForSeconds(1);
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)initHandIds);
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, (object)NarratorId);
     }
 
     public void RestoreSession(string sessionId)
