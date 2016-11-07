@@ -118,6 +118,15 @@ public class GameSession : MonoBehaviour
                 }
                 break;
             case Phase.PickCard :
+                if (targetPhase == Phase.ShowScore)
+                {
+                    InitAllPlayersState();
+                    HUD.Instruction.text = INSTRUCTION_SHOWSCORE;
+                    m_CurrentPhase = Phase.ShowScore;
+                    // args[0] => InGameCardModel[] cardResults : cardId, ownerId, isThemeCard
+                    // args[1] => Dictionary<string, DataPair<string, int>> playerResults : playerId, <votedCardId, playerNewScore>
+                    ProcessResults((InGameCardModel[])args[0], (Dictionary<string, DataPair<string, int>>)args[1]);
+                }
                 break;
             case Phase.ShowScore :
                 break;
@@ -295,13 +304,39 @@ public class GameSession : MonoBehaviour
         return true;
     }
 
-    public void ShowOtherPlayerPlayerCard(string playerId)
+    public void MarkOtherPlayerPickCard(string playerId)
     {
-        if (m_CurrentPhase != Phase.PlayCard) { return; }
-
-        if (GetPlayer(playerId).State == InGamePlayerModel.InGameState.Done) { return; }
-        Table.PutOtherPlayerPlayedCard(playerId);
+        if (m_CurrentPhase != Phase.PickCard) { return; }
+        
         UpdateOtherPlayerState(playerId, InGamePlayerModel.InGameState.Done);
+    }
+
+    public void ProcessResults(InGameCardModel[] cardResults, Dictionary<string, DataPair<string, int>> playerResults)
+    {
+        foreach (InGameCardModel cardResult in cardResults)
+        {
+            CardSlot slot = Table.CardSlots.FirstOrDefault(s => s.Card.CardId == cardResult.CardId);
+            if (slot)
+            {
+                slot.Card.SetOwner(cardResult.OwnerId);
+                slot.ShowOwner();
+                slot.EnableHighlight(cardResult.IsThemeCard);
+            }
+        }
+        foreach (KeyValuePair<string, DataPair<string, int>> playerResult in playerResults)
+        {
+            if (playerResult.Key != m_LocalPlayer.UserId && playerResult.Key != Storyteller.UserId)
+            {
+                CardSlot slot = Table.CardSlots.FirstOrDefault(s => s.Card.CardId == playerResult.Value.Value1);
+                if (slot)
+                {
+                    slot.AddVoter(playerResult.Key);
+                }
+            }
+            // update scores
+            HUD.InGamePlayerList.UpdateScore(playerResult.Key, playerResult.Value.Value2);
+            GetPlayer(playerResult.Key).Score = playerResult.Value.Value2;
+        }
     }
 
     public void UpdateOtherPlayerState(string playerId, InGamePlayerModel.InGameState newState)

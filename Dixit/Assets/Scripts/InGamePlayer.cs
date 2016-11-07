@@ -19,6 +19,8 @@ public class InGamePlayer : MonoBehaviour {
     public class ColorEvent : UnityEvent<Color> { };
 
     [SerializeField]
+    private Animator m_Animator = null;
+    [SerializeField]
     private StateView[] m_StateViews = null;
 
     [Header("Events")]
@@ -43,5 +45,15 @@ public class InGamePlayer : MonoBehaviour {
         onStateColorUpdate.Invoke(stateView.Color);
         onStateTextUpdate.Invoke(stateView.Text);
         onScoreUpdate.Invoke(m_PlayerModel.Score.ToString());
+    }
+
+    public void UpdateScore(int score)
+    {
+        if (score > m_PlayerModel.Score)
+        {
+            m_PlayerModel.Score = score;
+            m_Animator.SetTrigger("scoreUp");
+            onScoreUpdate.Invoke(m_PlayerModel.Score.ToString());
+        }
     }
 }

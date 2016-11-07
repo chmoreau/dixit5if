@@ -1203,6 +1203,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_FaceUpAnchor: {fileID: 4000010851353472}
   m_FaceDownAnchor: {fileID: 4000013102220326}
+  m_HighlightAnimator: {fileID: 95000012269429320}
   m_Card: {fileID: 0}
   m_Clickable: {fileID: 114000013667683714}
   m_OwnerView: {fileID: 224000013090395544}

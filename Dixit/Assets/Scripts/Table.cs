@@ -38,7 +38,7 @@ public class Table : MonoBehaviour {
     private Transform m_DisplayTargetPoint = null;
     
     private CardSlot[] m_CardSlots = new CardSlot[0];
-    //public CardSlot[] CardSlots { get { return m_CardSlots; } }
+    public CardSlot[] CardSlots { get { return m_CardSlots; } }
     private int m_SlotPointer = 0;
 
     private int m_SelectedCardIndex = -1;

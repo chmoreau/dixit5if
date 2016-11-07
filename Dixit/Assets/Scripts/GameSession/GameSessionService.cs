@@ -21,6 +21,11 @@ public class GameSessionService : MonoBehaviour
     public InGameCardModel[] TableCardIds = null;
     public string[] PlayedCardIds = null;
     public string[] VoteResult = null;
+    [Header("Results")]
+    public InGameCardModel[] CardResults = new InGameCardModel[3];
+    public string[] PlayerIds = new string[3];
+    public string[] PlayerVotes = new string[3];
+    public int[] PlayerScores = new int[3];
 
     private static GameSession m_CurrentGameSession = null;
     public static GameSession CurrentGameSession
@@ -59,6 +64,21 @@ public class GameSessionService : MonoBehaviour
     public void TestToPickCardPhase()
     {
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.PickCard, (object)PlayedCardIds);
+    }
+
+    public void TestOtherPlayerPickCard(string playerId)
+    {
+        m_CurrentGameSession.MarkOtherPlayerPickCard(playerId);
+    }
+
+    public void TestToShowScorePhase()
+    {
+        Dictionary<string, DataPair<string, int>> dic = new Dictionary<string, DataPair<string, int>>();
+        for (int i = 0; i < PlayerIds.Length; i++)
+        {
+            dic.Add(PlayerIds[i], new DataPair<string, int>(PlayerVotes[i], PlayerScores[i]));
+        }
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ShowScore, (object)CardResults, (object)dic);
     }
     #endregion
 

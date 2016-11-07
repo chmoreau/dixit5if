@@ -59,4 +59,9 @@ public class InGamePlayerList : MonoBehaviour {
     {
         m_PlayerList[playerId].UpdateView();
     }
+
+    public void UpdateScore(string playerId, int score)
+    {
+        m_PlayerList[playerId].UpdateScore(score);
+    }
 }

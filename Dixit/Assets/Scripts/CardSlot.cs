@@ -9,6 +9,8 @@ public class CardSlot : MonoBehaviour {
     [SerializeField]
     private Transform m_FaceDownAnchor = null;
     [SerializeField]
+    private Animator m_HighlightAnimator = null;
+    [SerializeField]
     private Card m_Card;
     [SerializeField]
     private Button m_Clickable = null;
@@ -36,6 +38,7 @@ public class CardSlot : MonoBehaviour {
         {
             Destroy(m_Card.gameObject);
         }
+        EnableHighlight(false);
         HideOwner();
         ClearVoters();
     }
@@ -52,6 +55,11 @@ public class CardSlot : MonoBehaviour {
         m_OwnerView.gameObject.SetActive(false);
         Text text = m_OwnerView.GetComponentInChildren<Text>();
         text.text = string.Empty;
+    }
+
+    public void EnableHighlight(bool isEnabled)
+    {
+        m_HighlightAnimator.SetBool("highlight", isEnabled);
     }
 
     public void AddVoter(string voterId)
