@@ -5724,7 +5724,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Inscriez-vous!
+  m_Text: Inscription
 --- !u!222 &1192362222
 CanvasRenderer:
   m_ObjectHideFlags: 0
