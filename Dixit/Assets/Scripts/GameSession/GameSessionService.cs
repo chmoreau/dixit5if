@@ -89,7 +89,7 @@ public class GameSessionService : MonoBehaviour
     public void TestToNexrDrawCardPhase()
     {
         string[] newHands = { "4" };
-        string newNarrator = "testid_local";
+        string newNarrator = "1";
         m_CurrentGameSession.StartNextRound(newHands, newNarrator);
     }
     #endregion

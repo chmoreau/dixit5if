@@ -3162,7 +3162,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: test_remote_1
+          m_StringArgument: 2
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
@@ -4020,7 +4020,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: test_remote_2
+          m_StringArgument: 3
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
@@ -4280,7 +4280,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: test_remote_2
+          m_StringArgument: 3
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
@@ -5153,7 +5153,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: test_remote_1
+          m_StringArgument: 2
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,
@@ -10018,60 +10018,60 @@ MonoBehaviour:
   m_CameraAnimator: {fileID: 49058267}
   SessionId: test_session
   LocalPlayer:
-    m_UserId: 
-    m_Nickname: 
+    m_UserId: 1
+    m_Nickname: 1
     m_IsStoryteller: 0
     m_IsLocal: 0
     m_State: 0
     m_Score: 0
   OtherPlayers:
-  - m_UserId: 
-    m_Nickname: 
+  - m_UserId: 2
+    m_Nickname: 2
+    m_IsStoryteller: 1
+    m_IsLocal: 0
+    m_State: 0
+    m_Score: 0
+  - m_UserId: 3
+    m_Nickname: 3
     m_IsStoryteller: 0
     m_IsLocal: 0
     m_State: 0
     m_Score: 0
-  - m_UserId: 
-    m_Nickname: 
-    m_IsStoryteller: 0
-    m_IsLocal: 0
-    m_State: 0
-    m_Score: 0
-  NarratorId: 
+  NarratorId: 2
   Phase: -1
   HandIds:
-  - 
-  - 
-  - 
-  - 
-  - 
-  - 
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
   Theme: 
   TableCardIds: []
   PlayedCardIds:
-  - 
-  - 
-  - 
+  - 1
+  - 2
+  - 3
   VoteResult: []
   CardResults:
   - m_CardId: 1
-    m_OwnerId: testid_local
+    m_OwnerId: 1
     m_IsThemeCard: 0
   - m_CardId: 2
-    m_OwnerId: test_remote_1
+    m_OwnerId: 2
     m_IsThemeCard: 1
   - m_CardId: 3
-    m_OwnerId: test_remote_2
+    m_OwnerId: 3
     m_IsThemeCard: 0
   PlayerIds:
-  - testid_local
-  - test_remote_1
-  - test_remote_2
+  - 1
+  - 2
+  - 3
   PlayerVotes:
   - 2
   - 
   - 2
-  PlayerScores: 010000000100000001000000
+  PlayerScores: 000000000200000005000000
 --- !u!1 &1632146512
 GameObject:
   m_ObjectHideFlags: 0
@@ -11387,7 +11387,7 @@ MonoBehaviour:
           m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
-          m_StringArgument: test_remote_2
+          m_StringArgument: 3
           m_BoolArgument: 0
         m_CallState: 2
     m_TypeName: UnityEngine.UI.Button+ButtonClickedEvent, UnityEngine.UI, Version=1.0.0.0,

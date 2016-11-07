@@ -14,6 +14,7 @@ public class HUD : MonoBehaviour {
         InGamePlayerList.Init();
         InGamePlayerList.SetVisibile();
         Instruction.text = GameSession.INSTRUCTION_INITSESSION;
+        EnableNextButton(false);
         NextButton.onClick.AddListener(() => { GameSessionService.CurrentGameSession.ReadyForNextRound(); });
     }
 
