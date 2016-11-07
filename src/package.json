@@ -6,6 +6,10 @@
     "express": "4.14.0",
     "socket.io": "1.5.0"
   },
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js"
+  },
   "devDependencies": {
     "jasmine": "2.5.2",
     "mocha": "^3.1.2",
