@@ -1,4 +1,4 @@
-const STACK_SIZE = 20;
+const STACK_SIZE = 36;
 const HAND_SIZE = 6;
 
 var Match = require('./models/Match.js');
@@ -390,7 +390,6 @@ function sendStartTurn(game, ioPlayers) {
         console.log(newTurn);
         ioPlayers.sendToPlayer(playerInfo.playerId, Messages.START_TURN, newTurn);
         newTurn.hand = hand;
-
     })
     console.log('start turn information sent');
 }
