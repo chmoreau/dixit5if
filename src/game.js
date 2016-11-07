@@ -159,6 +159,7 @@ Game.prototype.newTurn = function (ioPlayers) {
                     /**GAME_OVER */
                     scores.forEach(function(Element) {
                         ioPlayers.sendToAll(Messages.GAME_OVER,  Element );
+
                     });
                     
                 } else {
@@ -237,7 +238,7 @@ function calculteScores(turn) {
     var narratorCard = getNarratorCard(trick, narratorID);
     var nbNarrVote = getNbNarratorVote(trick, narratorCard);
 
-    if (nbNarrVote === (trick.length - 1 || 0)) {
+    if ((nbNarrVote === trick.length - 1) || (nbNarrVote === 0)) {
         // everyone or nobody find the narrator's card
         // +2 for all players except the narrator (too easy/too hard)
         trick.forEach(function (playerTrick, index, array) {
@@ -247,27 +248,31 @@ function calculteScores(turn) {
         });
         console.log("+2 for everyone");
     } else {
-        // some players find narrator's card
-        trick.forEach(function (playerTrick, index, array) {
+         trick.forEach(function (playerTrick, index, array) {
             if (playerTrick.playerID == narratorID) {
-                // narrator succed
+                // narrator succeed
                 playerTrick.score += 3;
             } else {
-                // if the player choosed the narrator'card : +3
                 if (playerTrick.score.cardPicked == narratorCard) {
                     playerTrick.score += 3;
                 }
-                // if others players choosed the player's card, he gets +1
-                var nbPlayerCardVote = 0; // nb of votes for the player card
-                trick.forEach(function (pTrick) {
-                    if (pTrick.playerID !== playerTrick.playerID && pTrick.cardPicked == playerTrick.cardPlayed) {
-                        nbPlayerCardVote++;
-                    };
-                });
-                playerTrick.score += nbPlayerCardVote;
-            };
-        });
+            }
+         });
     }
+
+    trick.forEach(function (playerTrick, index, array) {
+        if (playerTrick.playerID !== narratorID) {
+            // if others players choosed the player's card, he gets +1
+            var nbPlayerCardVote = 0; // nb of votes for the player card
+            trick.forEach(function (pTrick) {
+                if (pTrick.playerID !== playerTrick.playerID && pTrick.cardPicked == playerTrick.cardPlayed) {
+                    nbPlayerCardVote++;
+                };
+            });
+            playerTrick.score += nbPlayerCardVote;
+        };
+    });
+
     turn.trick = trick;
 }
 
