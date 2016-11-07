@@ -344,8 +344,8 @@ public class GameSession : MonoBehaviour
                 }
             }
             // update scores
+            GetPlayer(playerResult.Key).AddPoints(playerResult.Value.Value2);
             HUD.InGamePlayerList.AddScore(playerResult.Key, playerResult.Value.Value2);
-            //GetPlayer(playerResult.Key).AddPoints(playerResult.Value.Value2);
         }
     }
 
@@ -371,6 +371,12 @@ public class GameSession : MonoBehaviour
     {
         TranslateToPhase(Phase.DrawHand, (object)newHandIds);
         TranslateToPhase(Phase.ChooseTheme, (object)newStorytellerId);
+    }
+
+    public void UpdateScore(string playerId, int score)
+    {
+        GetPlayer(playerId).Score = score;
+        HUD.InGamePlayerList.ForcePlayerViewUpdate(playerId);
     }
 
     public void UpdateOtherPlayerState(string playerId, InGamePlayerModel.InGameState newState)
