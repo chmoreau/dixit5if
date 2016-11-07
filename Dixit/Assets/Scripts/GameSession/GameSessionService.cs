@@ -40,11 +40,6 @@ public class GameSessionService : MonoBehaviour
         }
     }
 
-    public void TestCreateSession()
-    {
-        DestroySession();
-        CreateSession();
-    }
 
     public void TestPlayPhase()
     {
@@ -75,7 +70,7 @@ public class GameSessionService : MonoBehaviour
         return gameSession;
     }
 
-    public void CreateSession()
+    public void CreateSession( string storyTeller)
     {
         if (m_CurrentGameSession != null) { return; }
         // todo : network api
@@ -87,16 +82,23 @@ public class GameSessionService : MonoBehaviour
         InGamePlayerModel[] otherPlayers = OtherPlayers; // test
         string[] initHandIds = HandIds; // test
 
-        StartCoroutine(CreateSessionCoroutine(sessionId, localPlayer, otherPlayers, initHandIds));        
+        StartCoroutine(CreateSessionCoroutine(sessionId, localPlayer, otherPlayers, initHandIds, storyTeller));        
     }
 
-    private IEnumerator CreateSessionCoroutine(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, string[] initHandIds)
+    private IEnumerator CreateSessionCoroutine(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, string[] initHandIds, string storyTeller)
     {
         m_CurrentGameSession = InstantiateSessionInstance();
         m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers);
         m_CameraAnimator.SetBool("inGame", true);
         yield return new WaitForSeconds(1);
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)initHandIds);
+        yield return new WaitForSeconds(6);
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, storyTeller);
+    }
+
+    public void StoryTeller(string storyTeller)
+    {
+        m_CurrentGameSession.SetStoryteller(storyTeller);
     }
 
     public void RestoreSession(string sessionId)
@@ -131,8 +133,4 @@ public class GameSessionService : MonoBehaviour
         DestroyImmediate(m_CurrentGameSession.gameObject);
     }
 
-    public void JoinMatchMaking(int playerNumber)
-    {
-        // Network.JoinMatchMaking(3)
-    }
 }

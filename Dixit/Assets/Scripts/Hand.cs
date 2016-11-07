@@ -44,6 +44,7 @@ public class Hand : MonoBehaviour {
         }
         for (int i = 0; i < HAND_SIZE && i < handIds.Length; i++)
         {
+            Debug.Log(handIds[i]);
             m_CardSlots[i].Card = GameSessionService.CurrentGameSession.InstantiateCard(handIds[i], GameSessionService.CurrentGameSession.LocalPlayer.UserId, m_CardSlots[i].FaceUpAnchor);
             m_CardSlots[i].Card.transform.SetParent(m_CardSlots[i].transform);
         }

@@ -110,17 +110,9 @@ public class Network : MonoBehaviour
             Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
             Dictionary<string, string> data = e.data.ToDictionary();
             List<string> keyList = new List<string>(data.Keys);
-            for(int i=0;i<keyList.Count;++i)
-            {
-                Debug.Log(keyList[i]);
-            }
-            Debug.Log(data.Count);
             string narrator = data["narrator"];
-            Debug.Log(narrator);
-         
             string hand = data["hand"];
            
-            Debug.Log(hand);
 
             List<string> cards = new List<string>();
             string aux = "";
@@ -140,9 +132,7 @@ public class Network : MonoBehaviour
             GameObject go = GameObject.Find("GameSessionService");
             GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
             gameSession.HandIds = cards.ToArray();
-            for (int i = 0; i < cards.Count; ++i)
-                Debug.Log(cards[i]);
-            gameSession.CreateSession();
+            gameSession.CreateSession(narrator);
             first_turn = false;
         } else
         {
@@ -153,6 +143,7 @@ public class Network : MonoBehaviour
     public void ReceiveTheme(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+
     }
 
     public void CardPlayed(SocketIOEvent e)
@@ -222,7 +213,7 @@ public class Network : MonoBehaviour
     public void ConfirmTheme(string theme)
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
-        data["THEME"] = theme;
+        data["theme"] = theme;
         socket.Emit("THEME", new JSONObject(data));
     }
 

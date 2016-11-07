@@ -36,6 +36,7 @@ public class Deck : MonoBehaviour {
 
     public Card FetchAndInstantiateCard(string cardId, string ownerId, Transform anchor)
     {
+
         Card card = Instantiate(m_CardPrefab, anchor.position, anchor.rotation) as Card;
         card.SetOwner(ownerId);
         CardModel model = m_DeckDatabase.FetchCardModel(cardId);
@@ -44,7 +45,8 @@ public class Deck : MonoBehaviour {
     }
 
     public CardModel FetchCardModel(string cardId)
-    {        
+    {
+        Debug.Log(cardId);
         CardModel model = m_DeckDatabase.FetchCardModel(cardId);
         return model;
     }

@@ -171,6 +171,7 @@ public class GameSession : MonoBehaviour
         {
             HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_STORYTELLER;
             m_LocalPlayer.IsStoryteller = true;
+            
             m_LocalPlayer.State = InGamePlayerModel.InGameState.Waiting;
             Table.SetStorytellerName(m_LocalPlayer.Nickname);
             Table.EnableThemeInput();
@@ -217,8 +218,11 @@ public class GameSession : MonoBehaviour
     public bool ConfirmTheme(string theme)
     {
         if (!m_LocalPlayer.IsStoryteller || m_CurrentPhase != Phase.ChooseTheme) { return false; }
-        //todo : network api
-        //return Network.ConfirmTheme(currentSessionId, theme);
+        Debug.Log(theme);
+        GameObject go = GameObject.Find("NetworkService");
+
+        Network network = (Network)go.GetComponent(typeof(Network));
+        network.ConfirmTheme(theme);
         return true;
     }
 
