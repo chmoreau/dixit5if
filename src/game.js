@@ -238,7 +238,8 @@ function calculteScores(turn) {
     var nbNarrVote = getNbNarratorVote(trick, narratorCard);
 
     if (nbNarrVote === (trick.length - 1 || 0)) {
-        // +2 for all players except the narrator
+        // everyone or nobody find the narrator's card
+        // +2 for all players except the narrator (too easy/too hard)
         trick.forEach(function (playerTrick, index, array) {
             if (playerTrick.playerID !== narratorID) {
                 playerTrick.score += 2;
@@ -246,16 +247,20 @@ function calculteScores(turn) {
         });
         console.log("+2 for everyone");
     } else {
+        // some players find narrator's card
         trick.forEach(function (playerTrick, index, array) {
             if (playerTrick.playerID == narratorID) {
+                // narrator succed
                 playerTrick.score += 3;
             } else {
+                // if the player choosed the narrator'card : +3
                 if (playerTrick.score.cardPicked == narratorCard) {
                     playerTrick.score += 3;
                 }
-                var nbPlayerCardVote = -1; // -1 so we dont count the player himself
+                // if others players choosed the player's card, he gets +1
+                var nbPlayerCardVote = 0; // nb of votes for the player card
                 trick.forEach(function (pTrick) {
-                    if (pTrick.cardPicked == playerTrick.cardPlayed) {
+                    if (pTrick.playerID !== playerTrick.playerID && pTrick.cardPicked == playerTrick.cardPlayed) {
                         nbPlayerCardVote++;
                     };
                 });
