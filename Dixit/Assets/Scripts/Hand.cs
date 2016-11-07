@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
 
 public class Hand : MonoBehaviour {
     public const int HAND_SIZE = 6;
@@ -114,11 +116,39 @@ public class Hand : MonoBehaviour {
     {
         m_IsInteractable = false;
 
+        for (int i = 0; i < m_CardSlots.Length; i++)
+        {
+            m_CardSlotPanel.GetChild(i).gameObject.SetActive(i < cardIds.Length);
+        }
+        List<string> oldHandIds = new List<string>();
+        for (int i = 0; i < m_CardSlotPanel.childCount; i++)
+        {
+            CardSlot slot = m_CardSlotPanel.GetChild(i).GetComponent<CardSlot>();
+            if (slot.Card != null)
+            {
+                oldHandIds.Add(slot.Card.CardId);
+            }
+        }
+        string[] newHandIds = cardIds.ToList().Where(n => !oldHandIds.Any(o => o == n)).ToArray();
+        Debug.Log(oldHandIds);
+        Debug.Log(newHandIds);
+        if (newHandIds.Length > 0)
+        {
+            for (int i = 0, k = 0; i < m_CardSlots.Length && k < newHandIds.Length; i++)
+            {
+                CardSlot slot = m_CardSlotPanel.GetChild(i).GetComponent<CardSlot>();
+                if (slot.Card == null)
+                {
+                    GameSessionService.CurrentGameSession.DrawCardFromDeck(cardIds[k++], slot);
+                    yield return new WaitForSeconds(0.4f);
+                }
+            }
+        }
+        /*
         foreach (CardSlot slot in m_CardSlots)
         {
             slot.gameObject.SetActive(true);
         }
-
         int k = 0;        
         for (int i = 0; i < m_CardSlotPanel.childCount; i++)
         {
@@ -129,6 +159,7 @@ public class Hand : MonoBehaviour {
                 yield return new WaitForSeconds(0.4f);
             }
         }
+        */
 
         m_IsInteractable = true;
     }
