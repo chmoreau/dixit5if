@@ -130,7 +130,11 @@ Game.prototype.newTurn = function (ioPlayers) {
                 calculteScores(match.turn);
                 console.log("scores of the turn calculated");
                 /**TRICK */
-                ioPlayers.sendToAll(Messages.TRICK, { trick: match.turn.trick });
+
+                match.turn.trick.forEach(function(element) {
+                    ioPlayers.sendToAll(Messages.TRICK, element);
+                });
+             //   ioPlayers.sendToAll(Messages.TRICK, { trick: match.turn.trick });
                 updatePlayersScores(match);
                 console.log("players' scores updated");
                 var scores = getScores(match.players);
