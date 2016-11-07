@@ -320,6 +320,12 @@ public class Network : MonoBehaviour
         socket.Emit("PICK_CARD", new JSONObject(data));
     }
 
+    public void ReadyForNext()
+    {
+        Debug.Log("We want to emit");
+        socket.Emit("READY_FOR_NEXT");
+    }
+
     public void Disconnect()
     {
         socket.Emit("Disconnect");

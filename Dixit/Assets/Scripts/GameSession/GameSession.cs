@@ -363,10 +363,14 @@ public class GameSession : MonoBehaviour
 
     public void ReadyForNextRound()
     {
+       // Debug.Log(m_CurrentPhase);
         if (m_CurrentPhase != Phase.ShowScore) { return; }
         // todo : Network api
         // all players ready before server send next round data!
         // Network.ReadyForNext();
+        GameObject go = GameObject.Find("NetworkService");
+        Network gameSession = (Network)go.GetComponent(typeof(Network));
+        gameSession.ReadyForNext();
 
         LocalPlayer.State = InGamePlayerModel.InGameState.Done;
         HUD.InGamePlayerList.ForcePlayerViewUpdate(LocalPlayer.UserId);
