@@ -9,6 +9,8 @@ public class Network : MonoBehaviour
     SocketIOComponent socket;
     public GameObject go;
     private IEnumerator update;
+    private bool first_turn = true;
+    private string storyTeller;
 
     public string UserName;
 
@@ -21,6 +23,7 @@ public class Network : MonoBehaviour
 
         socket.On("GAME_CREATED", GameCreated);
         socket.On("QUEUE_SIZE", QueueSize);
+        socket.On("INFO_PLAYERS", InfoPlayers);
         socket.On("START_TURN", StartTurn);
         socket.On("THEME", ReceiveTheme);
         socket.On("CARD_PLAYED", CardPlayed);
@@ -31,7 +34,6 @@ public class Network : MonoBehaviour
         socket.On("GAME_OVER", GameOver);
 
         JSONObject obj = new JSONObject();
-        StartCoroutine(update);
     }
 
     public void GameCreated(SocketIOEvent e)
@@ -43,7 +45,7 @@ public class Network : MonoBehaviour
         GameObject go = GameObject.Find("GameSessionService");
         GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
         gameSession.SessionId = gameID;
-        gameSession.CreateSession();
+        first_turn = true;
     }
 
     public void QueueSize(SocketIOEvent e)
@@ -56,40 +58,168 @@ public class Network : MonoBehaviour
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
     }
 
-    public void StartTurn(SocketIOEvent e)
+    public void InfoPlayers(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string s = data["names"];
+        List<string> players = new List<string>();
+        string aux = "";
+        for(int i=0;i<s.Length;++i)
+        {
+            if (s[i] != ' ')
+            {
+                aux = aux + s[i];
+            }
+            else
+            {
+                players.Add(aux);
+                aux = "";
+            }
+        }
+        GameObject go = GameObject.Find("GameSessionService");
+        GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        List<InGamePlayerModel> others = new List<InGamePlayerModel>();
+        for (int i=0;i<players.Count;++i)
+        {
+            if(players[i]==UserName)
+            {
+                gameSession.LocalPlayer = new InGamePlayerModel();
+                gameSession.LocalPlayer.Nickname = players[i];
+                gameSession.LocalPlayer.UserId = players[i];
+                gameSession.LocalPlayer.Score = 0;
+                gameSession.LocalPlayer.State = 0;
+            } else
+            {
+                InGamePlayerModel new_player = new InGamePlayerModel();
+                new_player.Nickname = players[i];
+                new_player.UserId = players[i];
+                new_player.Score = 0;
+                new_player.State = 0;
+                others.Add(new_player);
+            }
+        }
+        gameSession.OtherPlayers = others.ToArray();
+       
+    }
+
+    public void StartTurn(SocketIOEvent e)
+    {
+        if (first_turn)
+        {
+            Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+            Dictionary<string, string> data = e.data.ToDictionary();
+            List<string> keyList = new List<string>(data.Keys);
+            string narrator = data["narrator"];
+            string hand = data["hand"];
+            storyTeller = narrator;
+
+            List<string> cards = new List<string>();
+            string aux = "";
+            for (int i = 0; i < hand.Length; ++i)
+            {
+                if (hand[i] != ',' && hand[i] != ']')
+                {
+                    aux = aux + hand[i];
+                }
+                else
+                {
+                    cards.Add(aux);
+                    aux = "";
+                }
+            }
+            cards.Add(aux);
+            GameObject go = GameObject.Find("GameSessionService");
+            GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+            gameSession.HandIds = cards.ToArray();
+            gameSession.CreateSession(narrator);
+            first_turn = false;
+        } else
+        {
+
+        }
     }
 
     public void ReceiveTheme(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string theme = data["theme"];
+       
+        go = GameObject.Find("GameSessionService");
+        //GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        GameSessionService.CurrentGameSession.SetTheme(theme);
+        GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.PlayCard);
     }
 
     public void CardPlayed(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string playerId = data["playerID"];
+        go = GameObject.Find("GameSessionService");
+        //GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        GameSessionService.CurrentGameSession.PutOtherPlayerPlayedCard(playerId);
     }
 
     public void RevealCards(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string str = data["cards"];
+        Debug.Log(str);
+        List<string> cards = new List<string>();
+        string aux = "";
+        for(int i=0;i<str.Length;++i)
+        {
+            if(str[i] == ',')
+            {
+                cards.Add(aux);
+                aux = "";
+            } else
+            {
+                aux = aux + str[i];
+            }
+        }
+        for (int i = 0; i < cards.Count; ++i)
+            Debug.Log(cards[i]);
+        go = GameObject.Find("GameSessionService");
+        //GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.PickCard, (object)(cards.ToArray()));
     }
 
 
     public void CardPicked(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string playerId = data["playerID"];
+        go = GameObject.Find("GameSessionService");
+        //GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        GameSessionService.CurrentGameSession.MarkOtherPlayerPickCard(playerId);
     }
 
     public void NewTurn(SocketIOEvent e)
     {
+        /**
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string playerID = data["playerID"];
+        string score = data["score"];
+        go = GameObject.Find("GameSessionService");
+        GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        gameSession.UpdateScore(name,score);
+    */
     }
 
     public void Trick(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string playerID = data["playerID"];
+        string cardPlayed = data["cardPlayed"];
+        string score = data["score"];
+        string cardPicked = data["cardPicked"];
     }
 
     public void GameOver(SocketIOEvent e)
@@ -119,21 +249,21 @@ public class Network : MonoBehaviour
     public void PlayerReady()
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
-        data["name"] = UserName;
+        data["playerID"] = UserName;
         socket.Emit("PLAYER_READY", new JSONObject(data));
     }
 
     public void JoinMatchmaking()
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
-        data["playerId"] = UserName;
+        data["playerID"] = UserName;
         socket.Emit("JOIN_MATCHMAKING", new JSONObject(data));
     }
 
     public void ConfirmTheme(string theme)
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
-        data["THEME"] = theme;
+        data["theme"] = theme;
         socket.Emit("THEME", new JSONObject(data));
     }
 
@@ -141,14 +271,14 @@ public class Network : MonoBehaviour
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
         data["cardID"] = cardID;
-        socket.Emit("PLAYCARD", new JSONObject(data));
+        socket.Emit("PLAY_CARD", new JSONObject(data));
     }
 
-    public void PickCard(string cardID)
+    public void PickCard(string voteID)
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
-        data["cardId"] = cardID;
-        socket.Emit("", new JSONObject(data));
+        data["voteID"] = voteID;
+        socket.Emit("PICK_CARD", new JSONObject(data));
     }
 
     public void Disconnect()

@@ -10018,40 +10018,40 @@ MonoBehaviour:
   m_CameraAnimator: {fileID: 49058267}
   SessionId: test_session
   LocalPlayer:
-    m_UserId: testid_local
-    m_Nickname: Amaranth
+    m_UserId: 
+    m_Nickname: 
     m_IsStoryteller: 0
     m_IsLocal: 0
     m_State: 0
     m_Score: 0
   OtherPlayers:
-  - m_UserId: test_remote_1
-    m_Nickname: A
-    m_IsStoryteller: 1
-    m_IsLocal: 0
-    m_State: 0
-    m_Score: 0
-  - m_UserId: test_remote_2
-    m_Nickname: B
+  - m_UserId: 
+    m_Nickname: 
     m_IsStoryteller: 0
     m_IsLocal: 0
     m_State: 0
     m_Score: 0
-  NarratorId: test_remote_1
+  - m_UserId: 
+    m_Nickname: 
+    m_IsStoryteller: 0
+    m_IsLocal: 0
+    m_State: 0
+    m_Score: 0
+  NarratorId: 
   Phase: -1
   HandIds:
-  - 6
-  - 2
-  - 1
-  - 4
-  - 5
-  - 3
+  - 
+  - 
+  - 
+  - 
+  - 
+  - 
   Theme: 
   TableCardIds: []
   PlayedCardIds:
-  - 1
-  - 2
-  - 3
+  - 
+  - 
+  - 
   VoteResult: []
   CardResults:
   - m_CardId: 1

@@ -48,7 +48,7 @@ public class GameSessionService : MonoBehaviour
     public void TestCreateSession()
     {
         DestroySession();
-        CreateSession();
+        CreateSession(NarratorId);
     }
 
     public void TestToPlayCardPhase()
@@ -109,7 +109,7 @@ public class GameSessionService : MonoBehaviour
         return gameSession;
     }
 
-    public void CreateSession()
+    public void CreateSession(string narratorId)
     {
         if (m_CurrentGameSession != null) { return; }
         // todo : network api
@@ -121,17 +121,17 @@ public class GameSessionService : MonoBehaviour
         InGamePlayerModel[] otherPlayers = OtherPlayers; // test
         string[] initHandIds = HandIds; // test
 
-        StartCoroutine(CreateSessionCoroutine(sessionId, localPlayer, otherPlayers, initHandIds));        
+        StartCoroutine(CreateSessionCoroutine(sessionId, localPlayer, otherPlayers, initHandIds, narratorId));        
     }
 
-    private IEnumerator CreateSessionCoroutine(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, string[] initHandIds)
+    private IEnumerator CreateSessionCoroutine(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, string[] initHandIds, string narratorId)
     {
         m_CurrentGameSession = InstantiateSessionInstance();
         m_CurrentGameSession.InitSession(sessionId, localPlayer, otherPlayers);
         m_CameraAnimator.SetBool("inGame", true);
         yield return new WaitForSeconds(1);
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)initHandIds);
-        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, (object)NarratorId);
+        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, (object)narratorId);
     }
 
     public void RestoreSession(string sessionId)
