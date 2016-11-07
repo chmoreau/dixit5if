@@ -124,7 +124,7 @@ public class GameSession : MonoBehaviour
                     HUD.Instruction.text = INSTRUCTION_SHOWSCORE;
                     m_CurrentPhase = Phase.ShowScore;
                     // args[0] => InGameCardModel[] cardResults : cardId, ownerId, isThemeCard
-                    // args[1] => Dictionary<string, DataPair<string, int>> playerResults : playerId, <votedCardId, playerNewScore>
+                    // args[1] => Dictionary<string, DataPair<string, int>> playerResults : playerId, <votedCardId, playerdeltaScore>
                     ProcessResults((InGameCardModel[])args[0], (Dictionary<string, DataPair<string, int>>)args[1]);
                     HUD.EnableNextButton(true);
                 }
@@ -344,8 +344,8 @@ public class GameSession : MonoBehaviour
                 }
             }
             // update scores
-            HUD.InGamePlayerList.UpdateScore(playerResult.Key, playerResult.Value.Value2);
-            GetPlayer(playerResult.Key).Score = playerResult.Value.Value2;
+            HUD.InGamePlayerList.AddScore(playerResult.Key, playerResult.Value.Value2);
+            //GetPlayer(playerResult.Key).AddPoints(playerResult.Value.Value2);
         }
     }
 

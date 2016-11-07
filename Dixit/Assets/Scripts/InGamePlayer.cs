@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Events;
+using UnityEngine.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -20,6 +21,8 @@ public class InGamePlayer : MonoBehaviour {
 
     [SerializeField]
     private Animator m_Animator = null;
+    [SerializeField]
+    private Text m_DeltaScore = null;
     [SerializeField]
     private StateView[] m_StateViews = null;
 
@@ -47,11 +50,17 @@ public class InGamePlayer : MonoBehaviour {
         onScoreUpdate.Invoke(m_PlayerModel.Score.ToString());
     }
 
-    public void UpdateScore(int score)
+    public void ResetDeltaScore()
     {
-        if (score > m_PlayerModel.Score)
+        m_DeltaScore.text = string.Empty;
+    }
+
+    public void AddScore(int deltaScore)
+    {
+        if (deltaScore > 0)
         {
-            m_PlayerModel.Score = score;
+            //m_PlayerModel.AddPoints(deltaScore);
+            m_DeltaScore.text = deltaScore.ToString();
             m_Animator.SetTrigger("scoreUp");
             onScoreUpdate.Invoke(m_PlayerModel.Score.ToString());
         }
