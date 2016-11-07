@@ -52,7 +52,7 @@ MonoBehaviour:
   - m_CardId: 18
     m_CardImage: {fileID: 2800000, guid: 81ebdad4f904b3542b4fc61e8f727fe3, type: 3}
   - m_CardId: 19
-    m_CardImage: {fileID: 2800000, guid: 9a0769108005ce0478931187ed4f2cf5, type: 3}
+    m_CardImage: {fileID: 2800000, guid: a2cfa277ff51e6948a5979afd1b47573, type: 3}
   - m_CardId: 20
     m_CardImage: {fileID: 2800000, guid: bbf72cd4f8cc14d44ae7898a38c76621, type: 3}
   - m_CardId: 21

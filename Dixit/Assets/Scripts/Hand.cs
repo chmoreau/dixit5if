@@ -35,6 +35,7 @@ public class Hand : MonoBehaviour {
     private bool m_IsPlayable = false;
     public bool SetPlayable { set { m_IsPlayable = value; } }
     private IEnumerator m_ZoomCoroutine = null;
+    private bool zoomed = false;
    
     public void Init(string[] handIds = null, bool isInteractable = false, bool isPlayable = false)
     {
@@ -101,37 +102,47 @@ public class Hand : MonoBehaviour {
 
     public void FocusOnCard(int cardIndex)
     {
-        if (!m_IsInteractable) { return; }
-        if (!m_CardSlots[cardIndex].Card) { return; }
-
-        if (m_ZoomCoroutine == null && m_SelectedCardIndex == -1)
+        if (!zoomed)
         {
-            TransformAnimation.AnimationCallback onZoomInStart = () => { };
-            TransformAnimation.AnimationCallback onZoomInEnd = () => {
-                m_SelectedCardIndex = cardIndex;
-                m_ZoomCoroutine = null;
-            };
-            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[cardIndex].Card.gameObject, m_CardSlots[cardIndex].FaceUpAnchor, m_ZoomTargetPoint, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomInStart, onZoomInEnd);
-            StartCoroutine(m_ZoomCoroutine);
+            if (!m_IsInteractable) { return; }
+            if (!m_CardSlots[cardIndex].Card) { return; }
+
+            if (m_ZoomCoroutine == null && m_SelectedCardIndex == -1)
+            {
+                TransformAnimation.AnimationCallback onZoomInStart = () => { };
+                TransformAnimation.AnimationCallback onZoomInEnd = () =>
+                {
+                    m_SelectedCardIndex = cardIndex;
+                    m_ZoomCoroutine = null;
+                };
+                m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[cardIndex].Card.gameObject, m_CardSlots[cardIndex].FaceUpAnchor, m_ZoomTargetPoint, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomInStart, onZoomInEnd);
+                StartCoroutine(m_ZoomCoroutine);
+            }
+            zoomed = true;
         }
     }
 
     public void RestoreFocus()
     {
-        if (!m_IsInteractable) { return; }
-
-        if (m_ZoomCoroutine == null && m_SelectedCardIndex != -1)
+        if (zoomed)
         {
-            TransformAnimation.AnimationCallback onZoomOutStart = () => {
-                m_SelectedCardIndex = -1;
-            };
-            TransformAnimation.AnimationCallback onZoomOutEnd = () => 
+            if (!m_IsInteractable) { return; }
+
+            if (m_ZoomCoroutine == null && m_SelectedCardIndex != -1)
             {
-                m_ZoomCoroutine = null;
-            };
-            m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
-            StartCoroutine(m_ZoomCoroutine);
-        }     
+                TransformAnimation.AnimationCallback onZoomOutStart = () =>
+                {
+                    m_SelectedCardIndex = -1;
+                };
+                TransformAnimation.AnimationCallback onZoomOutEnd = () =>
+                {
+                    m_ZoomCoroutine = null;
+                };
+                m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_ZoomTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
+                StartCoroutine(m_ZoomCoroutine);
+            }
+            zoomed = false;
+        } 
     }
 
     public void PlayCard()

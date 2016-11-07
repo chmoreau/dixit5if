@@ -19,7 +19,6 @@ public class DeckDatabase : ScriptableObject {
         m_CardDictionary[m_DefaultCard.CardId] = m_DefaultCard;
         foreach (CardModel card in m_AllCards)
         {
-            Debug.Log(card.CardId);
             if (m_CardDictionary.ContainsKey(card.CardId))
             {
                 Debug.LogError("Duplicated key found in Deck database : " + card.CardId + ", value will be ignored.");
