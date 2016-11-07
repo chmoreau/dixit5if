@@ -135,6 +135,8 @@ public class Network : MonoBehaviour
             cards.Add(aux);
         if (first_turn)
         {
+            MatchMakingView matchmaking = FindObjectOfType<MatchMakingView>();
+            matchmaking.StopMatchMaking();
             GameObject go = GameObject.Find("GameSessionService");
             GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
             gameSession.HandIds = cards.ToArray();
