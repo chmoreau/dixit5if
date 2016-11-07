@@ -145,28 +145,58 @@ public class Network : MonoBehaviour
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
         Dictionary<string, string> data = e.data.ToDictionary();
         string theme = data["theme"];
-        GameObject go = GameObject.Find("Table");
-        Table table = (Table)go.GetComponent(typeof(Table));
-        table.SetTheme(theme);
+       
         go = GameObject.Find("GameSessionService");
         GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        gameSession.SetTheme(theme);
         gameSession.playCard();
     }
 
     public void CardPlayed(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string name = data["playerID"];
+        go = GameObject.Find("GameSessionService");
+        GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        gameSession.changeState(name);
     }
 
     public void RevealCards(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string str = data["cards"];
+        Debug.Log(str);
+        List<string> cards = new List<string>();
+        string aux = "";
+        for(int i=0;i<str.Length;++i)
+        {
+            if(str[i] == ',')
+            {
+                cards.Add(aux);
+                aux = "";
+            } else
+            {
+                aux = aux + str[i];
+            }
+        }
+        for (int i = 0; i < cards.Count; ++i)
+            Debug.Log(cards[i]);
+        go = GameObject.Find("GameSessionService");
+        GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        gameSession.RevealCards(cards.ToArray());
     }
 
 
     public void CardPicked(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        Dictionary<string, string> data = e.data.ToDictionary();
+        string name = data["playerID"];
+        go = GameObject.Find("GameSessionService");
+        GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
+        gameSession.changeState(name);
     }
 
     public void NewTurn(SocketIOEvent e)
@@ -228,14 +258,14 @@ public class Network : MonoBehaviour
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
         data["cardID"] = cardID;
-        socket.Emit("PLAYCARD", new JSONObject(data));
+        socket.Emit("PLAY_CARD", new JSONObject(data));
     }
 
-    public void PickCard(string cardID)
+    public void PickCard(string voteID)
     {
         Dictionary<string, string> data = new Dictionary<string, string>();
-        data["cardId"] = cardID;
-        socket.Emit("", new JSONObject(data));
+        data["voteID"] = voteID;
+        socket.Emit("PICK_CARD", new JSONObject(data));
     }
 
     public void Disconnect()

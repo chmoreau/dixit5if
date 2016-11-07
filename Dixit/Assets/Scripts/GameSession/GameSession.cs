@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 public class GameSession : MonoBehaviour
 {
@@ -29,6 +30,9 @@ public class GameSession : MonoBehaviour
     public Hand Hand = null;
     public Table Table = null;
     public HUD HUD = null;
+
+    public String storyTeller;
+    public String theme;
 
     private InGamePlayerModel m_LocalPlayer = null;
     public InGamePlayerModel LocalPlayer
@@ -171,8 +175,9 @@ public class GameSession : MonoBehaviour
         }
     }    
 
-    public void SetStoryteller(string storytellerId, string theme="")
+    public void SetStoryteller(string storytellerId)
     {
+        this.storyTeller = storytellerId;
         if (m_LocalPlayer.UserId == storytellerId)
         {
             HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_STORYTELLER;
@@ -202,6 +207,16 @@ public class GameSession : MonoBehaviour
         }
     }
 
+    public void SetTheme(string theme)
+    {
+        this.theme = theme;
+        Table.SetTheme(theme);
+        HUD.Instruction.text = INSTRUCTION_PLAYCARD;
+        m_CurrentPhase = Phase.PlayCard;
+        Hand.SetPlayable = true;
+        Hand.SetInteractable = true;
+    }
+
     private void DrawHand(string[] cardIds)
     {
         Hand.Draw(cardIds);
@@ -226,6 +241,7 @@ public class GameSession : MonoBehaviour
     public bool ConfirmTheme(string theme)
     {
         if (!m_LocalPlayer.IsStoryteller || m_CurrentPhase != Phase.ChooseTheme) { return false; }
+        this.theme = theme;
         Debug.Log(theme);
         GameObject go = GameObject.Find("NetworkService");
 
@@ -234,17 +250,44 @@ public class GameSession : MonoBehaviour
         return true;
     }
 
-    public bool PlayCard(string cardId)
+    private IEnumerator PLayCardCoroutine(string cardId)
     {
-        if (m_CurrentPhase != Phase.PlayCard) { return false; }
-        //todo : network api
-        //return Network.PlayCard(currentSessionId, localPlayerId, cardId);
+        yield return new WaitForSeconds(1);
+        GameObject go = GameObject.Find("NetworkService");
+        Network network = (Network)go.GetComponent(typeof(Network));
+        network.PlayCard(cardId);
+    }
+
+    private IEnumerator PickCardCoroutine(string cardId)
+    {
+        yield return new WaitForSeconds(1);
+        GameObject go = GameObject.Find("NetworkService");
+        Network network = (Network)go.GetComponent(typeof(Network));
+        network.PickCard(cardId);
+    }
+
+    public bool PlayCard(string cardId)
+    {   
         if (true)
         {
             m_LocalPlayer.State = InGamePlayerModel.InGameState.Done;
             HUD.InGamePlayerList.ForcePlayerViewUpdate(m_LocalPlayer.UserId);
         }
+        StartCoroutine(PLayCardCoroutine(cardId));
         return true;
+    }
+
+    public void RevealCards(InGameCardModel[] tableCards)
+    {  
+        Table.Init(tableCards.Length, storyTeller, theme, tableCards, true, true);
+        InitAllPlayersState();
+    }
+
+    public void PickCard(string card)
+    {
+        m_LocalPlayer.State = InGamePlayerModel.InGameState.Done;
+        HUD.InGamePlayerList.ForcePlayerViewUpdate(m_LocalPlayer.UserId);
+        StartCoroutine(PickCardCoroutine(card));
     }
 
     public void UpdateOtherPlayerState(string playerId, InGamePlayerModel.InGameState newState)

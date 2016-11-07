@@ -31,30 +31,19 @@ public class GameSessionService : MonoBehaviour
 
     private bool m_SessionDelayFlag = false;
 
-    #region Test
-    private void DestroySession()
-    {
-        if (m_CurrentGameSession != null)
-        {
-            DestroyImmediate(m_CurrentGameSession.gameObject);
-        }
-    }
 
+    public void changeState(string name)
+    {
+         m_CurrentGameSession.UpdateOtherPlayerState(name, InGamePlayerModel.InGameState.Done);
+    }
 
     public void TestPlayPhase()
     {
-        DestroySession();
 
         m_CurrentGameSession = InstantiateSessionInstance();
         LocalPlayer.State = InGamePlayerModel.InGameState.Waiting;
         m_CurrentGameSession.InitSession(SessionId, LocalPlayer, OtherPlayers, GameSession.Phase.PlayCard, HandIds, "test_theme_abc");
     }
-
-    public void TestUpdatePlayerState(string playerId)//, InGamePlayerModel.InGameState state = InGamePlayerModel.InGameState.Done)
-    {
-        m_CurrentGameSession.UpdateOtherPlayerState(playerId, InGamePlayerModel.InGameState.Done);
-    }
-    #endregion
 
     public void FetchAllSessionSketchs()
     {
@@ -101,6 +90,20 @@ public class GameSessionService : MonoBehaviour
         m_CurrentGameSession.SetStoryteller(storyTeller);
     }
 
+    public void RevealCards(string[] cards)
+    {
+        TableCardIds = new InGameCardModel[cards.Length];
+        Debug.Log(cards.Length);
+        for(int i=0; i < cards.Length; ++i)
+        {
+            Debug.Log(cards[i]);
+            TableCardIds[i] = new InGameCardModel();
+            TableCardIds[i].CardId = cards[i];
+            
+        }
+        m_CurrentGameSession.RevealCards(TableCardIds);
+    }
+
     public void pickCard()
     {
         m_CurrentGameSession.TranslateToPhase(GameSession.Phase.PickCard);
@@ -136,6 +139,13 @@ public class GameSessionService : MonoBehaviour
         if (m_CurrentGameSession == null) { return; }
         StartCoroutine(EndSessionCoroutine());
     }
+
+    public void SetTheme(string theme)
+    {
+        m_CurrentGameSession.SetTheme(theme);
+    }
+
+
 
     private IEnumerator EndSessionCoroutine()
     {

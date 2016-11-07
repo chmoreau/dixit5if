@@ -47,9 +47,9 @@ public class Table : MonoBehaviour {
 
     public void Init(int slotNumber, string storytellerName = null, string theme = null, InGameCardModel[] tableCards = null, bool isFaceUp = false, bool isInteractable = false, string[] voteResult = null)
     {
+        Reset();
         m_Theme.text = theme;
         m_StorytellerName.text = storytellerName;
-
         m_CardSlots = new CardSlot[slotNumber];
         if (tableCards == null)
         {
@@ -70,7 +70,11 @@ public class Table : MonoBehaviour {
                 //todo show votes
             }
             int k = i;
-            m_CardSlots[i].Clickable.onClick.AddListener(() => { FocusOnCard(k); });            
+            m_CardSlots[i].Clickable.onClick.AddListener(() => {
+
+                FocusOnCard(k);
+                RestoreFocus();
+            });            
         }
         m_SlotPointer = tableCards.Length;
 
@@ -197,5 +201,23 @@ public class Table : MonoBehaviour {
             m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_DisplayTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
             StartCoroutine(m_ZoomCoroutine);
         }
+    }
+
+    public void PickCard()
+    {
+        if (m_SelectedCardIndex == -1)
+            return;
+        int aux_index = m_SelectedCardIndex;
+        TransformAnimation.AnimationCallback onZoomOutStart = () => {
+              m_SelectedCardIndex = -1;
+        };
+        TransformAnimation.AnimationCallback onZoomOutEnd = () =>
+        {
+            m_ZoomCoroutine = null;
+        };
+        m_ZoomCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[m_SelectedCardIndex].Card.gameObject, m_DisplayTargetPoint, m_CardSlots[m_SelectedCardIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ZoomDuration, onZoomOutStart, onZoomOutEnd);
+        StartCoroutine(m_ZoomCoroutine);
+        GameSessionService.CurrentGameSession.PickCard(m_CardSlots[aux_index].Card.CardId);
+
     }
 }
