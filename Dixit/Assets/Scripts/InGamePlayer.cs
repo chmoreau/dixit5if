@@ -52,7 +52,7 @@ public class InGamePlayer : MonoBehaviour {
 
     public void ResetDeltaScore()
     {
-        m_DeltaScore.text = string.Empty;
+        m_DeltaScore.text = "";
     }
 
     public void AddScore(int deltaScore)

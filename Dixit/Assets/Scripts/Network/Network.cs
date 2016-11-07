@@ -11,6 +11,9 @@ public class Network : MonoBehaviour
     private IEnumerator update;
     private bool first_turn = true;
     private string storyTeller;
+    private string cardPickedByStoryTeller;
+    InGameCardModel[] cardModels = null;
+    Dictionary<string, DataPair<string, int>> dict = null;
 
     public string UserName;
 
@@ -80,6 +83,9 @@ public class Network : MonoBehaviour
         GameObject go = GameObject.Find("GameSessionService");
         GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
         List<InGamePlayerModel> others = new List<InGamePlayerModel>();
+        cardModels = new InGameCardModel[players.Count];
+        dict = new Dictionary<string, DataPair<string, int>>();
+        cnt = 0;
         for (int i=0;i<players.Count;++i)
         {
             if(players[i]==UserName)
@@ -105,8 +111,6 @@ public class Network : MonoBehaviour
 
     public void StartTurn(SocketIOEvent e)
     {
-        if (first_turn)
-        {
             Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
             Dictionary<string, string> data = e.data.ToDictionary();
             List<string> keyList = new List<string>(data.Keys);
@@ -129,6 +133,8 @@ public class Network : MonoBehaviour
                 }
             }
             cards.Add(aux);
+        if (first_turn)
+        {
             GameObject go = GameObject.Find("GameSessionService");
             GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
             gameSession.HandIds = cards.ToArray();
@@ -136,7 +142,8 @@ public class Network : MonoBehaviour
             first_turn = false;
         } else
         {
-
+            GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)cards.ToArray());
+            GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, (object)narrator);
         }
     }
 
@@ -201,25 +208,54 @@ public class Network : MonoBehaviour
 
     public void NewTurn(SocketIOEvent e)
     {
-        /**
+        
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
-        Dictionary<string, string> data = e.data.ToDictionary();
+        /*Dictionary<string, string> data = e.data.ToDictionary();
         string playerID = data["playerID"];
         string score = data["score"];
         go = GameObject.Find("GameSessionService");
         GameSessionService gameSession = (GameSessionService)go.GetComponent(typeof(GameSessionService));
         gameSession.UpdateScore(name,score);
-    */
+        */
+
     }
+
+    private int cnt = 0;
 
     public void Trick(SocketIOEvent e)
     {
+        
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
         Dictionary<string, string> data = e.data.ToDictionary();
         string playerID = data["playerID"];
         string cardPlayed = data["cardPlayed"];
         string score = data["score"];
-        string cardPicked = data["cardPicked"];
+        string cardPicked = "";
+        if (data.ContainsKey("cardPicked")) cardPicked = data["cardPicked"];
+        else cardPicked = cardPlayed;
+        cardModels[cnt] = new InGameCardModel();
+        cardModels[cnt].OwnerId = playerID;
+        cardModels[cnt].CardId = cardPlayed;
+
+        if (playerID == storyTeller)
+        {
+            cardModels[cnt].IsThemeCard = true;
+
+        }
+        else
+        {
+            cardModels[cnt].IsThemeCard = false;
+        }
+
+            DataPair<string, int> data_pair = new DataPair<string, int>(cardPicked, int.Parse(score));
+        dict.Add(playerID, data_pair);
+        cnt++;
+
+        if (cnt == cardModels.Length)
+        {
+            GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.ShowScore, cardModels, dict);
+        }
+
     }
 
     public void GameOver(SocketIOEvent e)
