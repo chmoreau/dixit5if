@@ -14,7 +14,8 @@ public class GameSession : MonoBehaviour
         ChooseTheme = 1,
         PlayCard = 2,
         PickCard = 3,
-        ShowScore = 4
+        ShowScore = 4,
+        EndSession = 5
     }
 
     public const string INSTRUCTION_INITSESSION = "Attendez l'initalisation de la partie du jeu";
@@ -25,6 +26,7 @@ public class GameSession : MonoBehaviour
     public const string INSTRUCTION_PICKCARD_STORYTELLER = "Attendez que les autres joueus finissent leur votes";
     public const string INSTRUCTION_PICKCARD_OTHERS = "Votez pour la carte que vous pensez etre celle du conteur";
     public const string INSTRUCTION_SHOWSCORE = "Voyez le résultat du vote et le décompte des points";
+    public const string INSTRUCTION_ENDSESSION = "Le jeu est terminé après {0} tours, voyez les scores finals de la partie";
 
     public Deck Deck = null;
     public Hand Hand = null;
@@ -55,6 +57,7 @@ public class GameSession : MonoBehaviour
 
     private string m_GameSessionId = null;
     private Phase m_CurrentPhase = Phase.InitSession;
+    private int m_RoundCounter = 0;
 
     void Awake()
     {
@@ -85,6 +88,7 @@ public class GameSession : MonoBehaviour
                     m_CurrentPhase = Phase.DrawHand;
                     DrawHand((string[])args[0]);
                     //HUD.InGamePlayerList.ForceAllViewsUpdate();
+                    m_RoundCounter++;
                 }
                 break;
             case Phase.DrawHand :
@@ -138,6 +142,13 @@ public class GameSession : MonoBehaviour
                     HUD.Instruction.text = INSTRUCTION_DRAWHAND;
                     m_CurrentPhase = Phase.DrawHand;
                     DrawHand((string[])args[0]);
+                    m_RoundCounter++;
+                }
+                else if (targetPhase == Phase.EndSession)
+                {
+                    HUD.EnableNextButton(false);
+                    HUD.Instruction.text = string.Format(INSTRUCTION_ENDSESSION, m_RoundCounter);
+                    m_CurrentPhase = Phase.EndSession;
                 }
                 break;
         }
@@ -153,7 +164,7 @@ public class GameSession : MonoBehaviour
         HUD.InGamePlayerList.ForceAllViewsUpdate();
     }
 
-    public void InitSession(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, Phase currentPhase = Phase.InitSession, string[] handIds = null, string theme = null, InGameCardModel[] tableCards = null, string[] voteResult = null)
+    public void InitSession(string sessionId, InGamePlayerModel localPlayer, InGamePlayerModel[] otherPlayers, Phase currentPhase = Phase.InitSession, string[] handIds = null, string theme = null, InGameCardModel[] tableCards = null, string[] voteResult = null, int roundCount = 0)
     {
         m_GameSessionId = sessionId;
         m_LocalPlayer = localPlayer;
@@ -168,6 +179,7 @@ public class GameSession : MonoBehaviour
                 HUD.Instruction.text = INSTRUCTION_INITSESSION;
                 Hand.Init();
                 Table.Init(otherPlayers.Length + 1);
+                m_RoundCounter = 0;
                 break;
             case Phase.DrawHand :
                 HUD.Instruction.text = INSTRUCTION_DRAWHAND;

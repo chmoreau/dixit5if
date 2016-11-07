@@ -263,6 +263,7 @@ public class Network : MonoBehaviour
     public void GameOver(SocketIOEvent e)
     {
         Debug.Log(string.Format("[name: {0}, data: {1}]", e.name, e.data));
+        GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.EndSession);
     }
 
     IEnumerator Update_Sockets()
