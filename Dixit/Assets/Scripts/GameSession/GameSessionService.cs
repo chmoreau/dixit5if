@@ -90,8 +90,7 @@ public class GameSessionService : MonoBehaviour
     {
         string[] newHands = { "4" };
         string newNarrator = "testid_local";
-        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)newHands);
-        m_CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, (object)newNarrator);
+        m_CurrentGameSession.StartNextRound(newHands, newNarrator);
     }
     #endregion
 

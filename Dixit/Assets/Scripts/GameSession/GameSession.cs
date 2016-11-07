@@ -367,6 +367,12 @@ public class GameSession : MonoBehaviour
         UpdateOtherPlayerState(playerId, InGamePlayerModel.InGameState.Done);
     }
 
+    public void StartNextRound(string[] newHandIds, string newStorytellerId)
+    {
+        TranslateToPhase(Phase.DrawHand, (object)newHandIds);
+        TranslateToPhase(Phase.ChooseTheme, (object)newStorytellerId);
+    }
+
     public void UpdateOtherPlayerState(string playerId, InGamePlayerModel.InGameState newState)
     {
         InGamePlayerModel player = m_OtherPlayers.First(p => p.UserId == playerId);
