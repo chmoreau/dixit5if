@@ -130,8 +130,6 @@ public class Hand : MonoBehaviour {
             }
         }
         string[] newHandIds = cardIds.ToList().Where(n => !oldHandIds.Any(o => o == n)).ToArray();
-        Debug.Log(oldHandIds);
-        Debug.Log(newHandIds);
         if (newHandIds.Length > 0)
         {
             for (int i = 0, k = 0; i < m_CardSlots.Length && k < newHandIds.Length; i++)
@@ -139,7 +137,7 @@ public class Hand : MonoBehaviour {
                 CardSlot slot = m_CardSlotPanel.GetChild(i).GetComponent<CardSlot>();
                 if (slot.Card == null)
                 {
-                    GameSessionService.CurrentGameSession.DrawCardFromDeck(cardIds[k++], slot);
+                    GameSessionService.CurrentGameSession.DrawCardFromDeck(newHandIds[k++], slot);
                     yield return new WaitForSeconds(0.4f);
                 }
             }
