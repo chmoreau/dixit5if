@@ -1,4 +1,4 @@
-const SESSION_SIZE = 2;
+const SESSION_SIZE = 3;
 
 var Messages = require('./messageType');
 var Game = require('./game.js');

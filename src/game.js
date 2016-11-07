@@ -101,7 +101,14 @@ Game.prototype.newTurn = function (ioPlayers) {
                 cards.push(element.cardPlayed);
             });
             cards = cards.sort(function () { return 0.5 - Math.random() });
-            ioPlayers.sendToAll(Messages.REVEAL_CARD, { cards: cards });
+            var i = 0;
+            var reveal = '';
+            for(i = 0; i < cards.length; ++i ) {
+                reveal = reveal + cards[i] + ',';
+            }
+            if(i === cards.length) {
+                ioPlayers.sendToAll(Messages.REVEAL_CARDS, { cards: reveal });
+            }
         }
     });
 
@@ -140,10 +147,15 @@ Game.prototype.newTurn = function (ioPlayers) {
                 var scores = getScores(match.players);
                 if (match.stack.length < match.players.length && match.players[0].hand.length === 0) {
                     /**GAME_OVER */
-                    ioPlayers.sendToAll(Messages.GAME_OVER, { scores: scores });
+                    scores.forEach(function(Element) {
+                        ioPlayers.sendToAll(Messages.GAME_OVER,  Element );
+                    });
+                    
                 } else {
                     /**NEW_TURN */
-                    ioPlayers.sendToAll(Messages.NEW_TURN, { scores: scores });
+                     scores.forEach(function(Element) {
+                        ioPlayers.sendToAll(Messages.NEW_TURN,  Element );
+                    });
                     game.newTurn(ioPlayers);
                 }
 
