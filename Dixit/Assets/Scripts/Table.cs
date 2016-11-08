@@ -36,7 +36,9 @@ public class Table : MonoBehaviour {
     private Transform m_ShuffleSpotPoint = null;
     [SerializeField]
     private Transform m_DisplayTargetPoint = null;
-    
+    [SerializeField]
+    public Button NextRoundButton = null;
+
     private CardSlot[] m_CardSlots = new CardSlot[0];
     public CardSlot[] CardSlots { get { return m_CardSlots; } }
     private int m_SlotPointer = 0;
@@ -76,6 +78,9 @@ public class Table : MonoBehaviour {
     {
         m_Theme.text = theme;
         m_StorytellerName.text = storytellerName;
+
+        EnableNextRoundButton(false);
+        NextRoundButton.onClick.AddListener(() => { GameSessionService.CurrentGameSession.ReadyForNextRound(); });
 
         m_CardSlots = new CardSlot[slotNumber];
         if (tableCards == null)
@@ -260,5 +265,16 @@ public class Table : MonoBehaviour {
 
         m_IsInteractable = false;
         m_CardSlots[m_SelectedCardIndex].AddVoter(GameSessionService.CurrentGameSession.LocalPlayer.UserId);
+    }
+
+    public void EnableNextRoundButton(bool isEnabled)
+    {
+        NextRoundButton.interactable = isEnabled;
+        NextRoundButton.gameObject.SetActive(isEnabled);
+    }
+
+    public void SetNextRoundButtonInteractable(bool isInteractable)
+    {
+        NextRoundButton.interactable = isInteractable;
     }
 }

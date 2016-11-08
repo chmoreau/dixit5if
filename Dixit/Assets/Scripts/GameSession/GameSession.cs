@@ -130,14 +130,14 @@ public class GameSession : MonoBehaviour
                     // args[0] => InGameCardModel[] cardResults : cardId, ownerId, isThemeCard
                     // args[1] => Dictionary<string, DataPair<string, int>> playerResults : playerId, <votedCardId, playerdeltaScore>
                     ProcessResults((InGameCardModel[])args[0], (Dictionary<string, DataPair<string, int>>)args[1]);
-                    HUD.EnableNextButton(true);
+                    Table.EnableNextRoundButton(true);
                 }
                 break;
             case Phase.ShowScore :
                 if (targetPhase == Phase.DrawHand)
                 {
                     InitAllPlayersState();
-                    HUD.EnableNextButton(false);
+                    Table.EnableNextRoundButton(false);
                     Table.Clear();
                     ResetStoryteller();
                     HUD.Instruction.text = INSTRUCTION_DRAWHAND;
@@ -147,7 +147,7 @@ public class GameSession : MonoBehaviour
                 }
                 else if (targetPhase == Phase.EndSession)
                 {
-                    HUD.SetNextButtonInteractable(false);
+                    Table.SetNextRoundButtonInteractable(false);
                     HUD.Instruction.text = string.Format(INSTRUCTION_ENDSESSION, m_RoundCounter);
                     m_CurrentPhase = Phase.EndSession;
                 }
@@ -221,9 +221,11 @@ public class GameSession : MonoBehaviour
 
     public void ResetStoryteller()
     {
-        if (Storyteller != null)
+        InGamePlayerModel storyteller = Storyteller;
+        if (storyteller != null)
         {
-            Storyteller.IsStoryteller = false;
+            storyteller.IsStoryteller = false;
+            HUD.InGamePlayerList.ForcePlayerViewUpdate(storyteller.UserId);
         }
         Table.SetStorytellerName(string.Empty);
     }

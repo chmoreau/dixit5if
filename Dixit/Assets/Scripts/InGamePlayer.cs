@@ -18,6 +18,8 @@ public class InGamePlayer : MonoBehaviour {
     public class StringEvent : UnityEvent<string> { };
     [Serializable]
     public class ColorEvent : UnityEvent<Color> { };
+    [Serializable]
+    public class BoolEvent : UnityEvent<bool> { };
 
     [SerializeField]
     private Animator m_Animator = null;
@@ -30,7 +32,8 @@ public class InGamePlayer : MonoBehaviour {
     public StringEvent onNicknameUpdate = new StringEvent();
     public StringEvent onStateTextUpdate = new StringEvent();
     public ColorEvent onStateColorUpdate = new ColorEvent();
-    public StringEvent onScoreUpdate = new StringEvent(); 
+    public StringEvent onScoreUpdate = new StringEvent();
+    public BoolEvent onIsStoryteller = new BoolEvent();
 
     private InGamePlayerModel m_PlayerModel = null;
     public InGamePlayerModel PlayerModel { get { return m_PlayerModel; } }
@@ -48,6 +51,7 @@ public class InGamePlayer : MonoBehaviour {
         onStateColorUpdate.Invoke(stateView.Color);
         onStateTextUpdate.Invoke(stateView.Text);
         onScoreUpdate.Invoke(m_PlayerModel.Score.ToString());
+        onIsStoryteller.Invoke(m_PlayerModel.IsStoryteller);
     }
 
     public void ResetDeltaScore()
