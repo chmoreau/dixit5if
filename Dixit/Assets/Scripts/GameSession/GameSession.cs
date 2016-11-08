@@ -98,7 +98,7 @@ public class GameSession : MonoBehaviour
                     m_CurrentPhase = Phase.ChooseTheme;
                     //Hand.SetInteractable = true;
                     SetStoryteller((string)args[0]);
-                    HUD.InGamePlayerList.ForceAllViewsUpdate();
+                    HUD.Instruction.text = m_LocalPlayer.IsStoryteller ? INSTRUCTION_CHOOSETHEME_STORYTELLER : INSTRUCTION_CHOOSETHEME_OTHERS;
                 }
                 break;
             case Phase.ChooseTheme:
@@ -139,6 +139,7 @@ public class GameSession : MonoBehaviour
                     InitAllPlayersState();
                     HUD.EnableNextButton(false);
                     Table.Clear();
+                    ResetStoryteller();
                     HUD.Instruction.text = INSTRUCTION_DRAWHAND;
                     m_CurrentPhase = Phase.DrawHand;
                     DrawHand((string[])args[0]);
@@ -218,32 +219,42 @@ public class GameSession : MonoBehaviour
         }
     }    
 
+    public void ResetStoryteller()
+    {
+        if (Storyteller != null)
+        {
+            Storyteller.IsStoryteller = false;
+        }
+        Table.SetStorytellerName(string.Empty);
+    }
+
     public void SetStoryteller(string storytellerId)
     {
         if (m_LocalPlayer.UserId == storytellerId)
         {
-            HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_STORYTELLER;
             m_LocalPlayer.IsStoryteller = true;
             Table.SetStorytellerName(m_LocalPlayer.Nickname);
             Table.EnableThemeInput();
         }
         else
         {
+            m_LocalPlayer.IsStoryteller = false;
             m_LocalPlayer.State = InGamePlayerModel.InGameState.Done;
         }
         foreach (InGamePlayerModel otherPlayer in m_OtherPlayers)
         {
             if (otherPlayer.UserId == storytellerId)
             {
-                HUD.Instruction.text = INSTRUCTION_CHOOSETHEME_OTHERS;
                 otherPlayer.IsStoryteller = true;
                 Table.SetStorytellerName(otherPlayer.Nickname);
             }
             else
             {
+                otherPlayer.IsStoryteller = false;
                 otherPlayer.State = InGamePlayerModel.InGameState.Done;
             }
         }
+        HUD.InGamePlayerList.ForceAllViewsUpdate();
     }
 
     private void DrawHand(string[] cardIds)
