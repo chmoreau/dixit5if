@@ -1,7 +1,6 @@
-const SESSION_SIZE = 2;
-const MATCHMAKING_REQUEST = "matchmaking request";
-const QUEUE_SIZE = "queueSize"
+const SESSION_SIZE = 3;
 
+var Messages = require('./messageType');
 var Game = require('./game.js');
 
 // FIFO that represents the players that are waiting for a match
@@ -12,12 +11,12 @@ module.exports = function Matchmaking(io) {
 }
 
 function connect(io) {
-    var matchmaking = io.of('/matchmaking');
-    matchmaking.on('connection', function(socket) {
+    //var matchmaking = io.of('/matchmaking');
+    io.on('connection', function(socket) {
 
-        socket.on(MATCHMAKING_REQUEST, function(playerId) {
+        socket.on(Messages.JOIN_MATCHMAKING, function(msg) {
 
-            var player = { playerId: playerId, socket: socket };
+            var player = { playerId: msg.playerID, socket: socket };
 
             // Add the user to the queue
             queue.unshift(player);
@@ -31,18 +30,17 @@ function connect(io) {
                 // TODO notify the relevant players
                 var game = new Game(io, playerList);
                 playerList.forEach(function(element) {
-                    element.socket.join("lobby"+game.id);
+                    element.socket.join(game.room);
                 }, this);
 
-                matchmaking.in("lobby"+game.id).emit('game created', game.id);
+                io.in(game.room).emit(Messages.GAME_CREATED, {gameID: game.id});
             }
 
             // Send the new queue size to the users
-            matchmaking.emit(QUEUE_SIZE, queue.length);
-
+            io.emit(Messages.QUEUE_SIZE, {queueLength:queue.length});
         });
 
-        socket.on('disconnect', function() {
+        socket.on('Disconnect', function() {
             // Find the disconnected player from his socket id
             var discPlayer = queue.find(function(element, index, array) {
                 return socket.id === element.socket.id;

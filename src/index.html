@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      body { font: 13px Helvetica, Arial; }
+      form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
+      form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
+      form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages li { padding: 5px 10px; }
+      #messages li:nth-child(odd) { background: #eee; }
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+
+    <input id="player" autofocus/><button id="playerID">playerID</button>
+    </br></br>
+    <input id="theme"/><button id="sendTheme">send theme</button>
+    </br></br>
+    <input id="card"/><button id="playCard">play card</button>
+    </br></br>
+    <input id="vote"/><button id="pickCard">pick card</button>
+      
+    <script src="https://cdn.socket.io/socket.io-1.2.0.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script>
+      var socket = io('');
+      var playerID;
+
+      $("#playerID").click(function(){
+        socket.emit('JOIN_MATCHMAKING', {playerID : $('#player').val()});
+        playerID = $('#player').val();
+        console.log(playerID);
+        return false;
+      });
+
+      $('#sendTheme').click(function(){
+        socket.emit('THEME', {theme:$('#theme').val()});
+      });
+
+      $('#playCard').click(function(){
+        $('#messages').append($('<li>').text("card played : " + $('#card').val()));
+        socket.emit('PLAY_CARD', {playerID:playerID, cardID:$('#card').val()});
+      });
+
+      $('#pickCard').click(function(){
+        $('#messages').append($('<li>').text("card picked : " + $('#vote').val()));
+        socket.emit('PICK_CARD', {playerID:playerID, voteID:$('#vote').val()});
+      });
+
+      socket.on('QUEUE_SIZE', function(msg){
+        $('#messages').append($('<li>').text(msg.queueLength));
+      });
+      
+      socket.on('GAME_CREATED', function(msg){
+        $('#messages').append($('<li>').text('GAME_CREATED'));
+
+        socket.on('DEBUG', function(msg){
+          $('#messages').append($('<li>').text('DEBUG MSG: '+msg));
+          socket.emit('DEBUG', 'DEBUG REPLY');
+        });
+        
+        socket.emit('PLAYER_READY', {playerID : playerID, lala : "lala"});
+
+        $('#messages').append($('<li>').text('room '+msg.gameID+' joined'));
+      });
+
+        socket.on('START_TURN', function(msg){
+          $('#messages').append($('<li>').text("start turn"));
+          $('#messages').append($('<li>').text("narrator : " + msg.narrator));
+        });
+
+        socket.on('THEME', function(msg){
+          $('#messages').append($('<li>').text('theme: '+msg.theme));
+        });
+
+        socket.on('CARD_PLAYED', function(msg){
+          $('#messages').append($('<li>').text("player " + msg.playerID + " played a card"));
+        });
+
+        socket.on('REVEAL_CARDS', function(msg){
+          var revealed = msg.cards;
+          var cards = "";
+          for(var i = 0; i < revealed.length; i++){
+            cards += revealed[i] + " ";
+          }
+          $('#messages').append($('<li>').text("Revealed cards " + cards + " played a card"));
+        });
+
+        socket.on('CARD_PICKED', function(msg){
+          $('#messages').append($('<li>').text("player " + msg.playerID + " picked a card"));
+        });
+
+        socket.on('TRICK', function(msg){
+          $('#messages').append($('<li>').text("all payers picked a card : end of the turn"));
+        });
+
+        socket.on('NEW_TURN', function(msg){
+          $('#messages').append($('<li>').text("new turn"));
+          socket.emit('READY_FOR_NEXT');
+        });
+
+        socket.on('GAME_OVER', function(msg){
+          $('#messages').append($('<li>').text("game over !!"));
+          socket = io('/matchmaking');
+        });
+      
+    </script>
+  </body>
+</html>

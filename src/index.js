@@ -9,9 +9,17 @@ app.get('/', function(req, res){
   res.sendFile(__dirname + '/index.html');
 });
 
-var server = http.listen(3000, function(){
-  console.log('listening on *:3000');
+var port = process.env.PORT || 8080;
+
+var server = http.listen(port, function(){
+  console.log('listening on: '+process.env.PORT);
 });
+
+module.exports.startServer = function(port){
+  server = http.listen(port, function(){
+    console.log('listening on *:'+port);
+  });
+}
 
 module.exports.closeServer = function(){
   server.close();
