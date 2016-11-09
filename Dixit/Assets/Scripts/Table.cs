@@ -187,12 +187,12 @@ public class Table : MonoBehaviour {
         }
     }
 
-    public void ShuffleAndRevealCards(string[] cardIds)
+    public void ShuffleAndRevealCards(string[] cardIds, string playedCardId)
     {
-        StartCoroutine(ShuffleAndDisplayCards(cardIds));
+        StartCoroutine(ShuffleAndDisplayCards(cardIds, playedCardId));
     }
 
-    public IEnumerator ShuffleAndDisplayCards(string[] cardIds)
+    private IEnumerator ShuffleAndDisplayCards(string[] cardIds, string playedCardId)
     {
         for (int i = 0; i < cardIds.Length; i++)
         {
@@ -204,21 +204,37 @@ public class Table : MonoBehaviour {
         yield return new WaitForSeconds(m_ShufflePause);
         for (int i = 0; i < cardIds.Length; i++)
         {
-            TransformAnimation.AnimationCallback onDisplayEnd = CreateReturnCoroutine(i);
+            TransformAnimation.AnimationCallback onDisplayEnd;
+            TransformAnimation.AnimationCallback endCallback = () => { };
+            if (i == cardIds.Length - 1)
+            {
+                endCallback += () => 
+                {
+                    m_IsInteractable = !GameSessionService.CurrentGameSession.LocalPlayer.IsStoryteller;
+                };
+            }
+            if (m_CardSlots[i].Card.CardId == playedCardId)
+            {
+                CardSlot slot = m_CardSlots[i];
+                endCallback += () =>
+                {                    
+                    slot.Card.SetOwner(GameSessionService.CurrentGameSession.LocalPlayer.UserId);
+                    slot.ShowOwner();
+                };
+            }
+            onDisplayEnd = CreateReturnCoroutine(i, endCallback);
             IEnumerator displayCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[i].Card.gameObject, m_ShuffleSpotPoint, m_DisplayTargetPoint, Vector3.zero, Vector3.zero, m_DisplayDuration, null, onDisplayEnd);
             StartCoroutine(displayCoroutine);
             yield return new WaitForSeconds(m_DisplayInterval);
-        }
-
-        m_IsInteractable = !GameSessionService.CurrentGameSession.LocalPlayer.IsStoryteller;
+        }        
     }
 
     // Out of the coroutine body to avoid the scope issue of local variables :(
-    private TransformAnimation.AnimationCallback CreateReturnCoroutine(int slotIndex)
+    private TransformAnimation.AnimationCallback CreateReturnCoroutine(int slotIndex, TransformAnimation.AnimationCallback endCallback)
     {
         return () =>
         {
-            IEnumerator returnCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[slotIndex].Card.gameObject, m_DisplayTargetPoint, m_CardSlots[slotIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ReturnDuration, null, null);
+            IEnumerator returnCoroutine = TransformAnimation.FromToAnimation(m_CardSlots[slotIndex].Card.gameObject, m_DisplayTargetPoint, m_CardSlots[slotIndex].FaceUpAnchor, Vector3.zero, Vector3.zero, m_ReturnDuration, null, endCallback);
             StartCoroutine(returnCoroutine);
         };
     }

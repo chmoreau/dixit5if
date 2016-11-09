@@ -15,6 +15,8 @@ public class MatchMakingView : MonoBehaviour
     private string m_Username = string.Empty;
     bool stopSearching = false;
 
+    private IEnumerator m_TickCoroutine = null;
+
     public void StartMatchMaking(int expectedPlayers = 3)
     {
         JoinMatchMaking();
@@ -57,7 +59,8 @@ public class MatchMakingView : MonoBehaviour
         GameObject go = GameObject.Find("NetworkService");
         Network network = (Network)go.GetComponent(typeof(Network));
         network.JoinMatchmaking();
-        StartCoroutine(Tick());
+        m_TickCoroutine = Tick();
+        StartCoroutine(m_TickCoroutine);
     }
 
     public void StopMatchMaking()
@@ -67,6 +70,7 @@ public class MatchMakingView : MonoBehaviour
         Network network = (Network)go.GetComponent(typeof(Network));
         network.Disconnect();
         m_MenuAnimator.SetTrigger("toMainMenu");
-        StopCoroutine(Tick());
+        StopCoroutine(m_TickCoroutine);
+        m_TickCoroutine = null;
     }
 }

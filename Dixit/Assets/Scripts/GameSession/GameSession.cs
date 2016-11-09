@@ -57,6 +57,7 @@ public class GameSession : MonoBehaviour
 
     private string m_GameSessionId = null;
     private Phase m_CurrentPhase = Phase.InitSession;
+    private string m_PlayerCardId = null;
     private int m_RoundCounter = 0;
 
     void Awake()
@@ -118,7 +119,7 @@ public class GameSession : MonoBehaviour
                     Storyteller.State = InGamePlayerModel.InGameState.Done;
                     HUD.InGamePlayerList.ForcePlayerViewUpdate(Storyteller.UserId);
                     m_CurrentPhase = Phase.PickCard;
-                    Table.ShuffleAndRevealCards((string[])args[0]);
+                    Table.ShuffleAndRevealCards((string[])args[0], m_PlayerCardId);
                 }
                 break;
             case Phase.PickCard :
@@ -140,6 +141,7 @@ public class GameSession : MonoBehaviour
                     Table.EnableNextRoundButton(false);
                     Table.Clear();
                     ResetStoryteller();
+                    m_PlayerCardId = null;
                     HUD.Instruction.text = INSTRUCTION_DRAWHAND;
                     m_CurrentPhase = Phase.DrawHand;
                     DrawHand((string[])args[0]);
@@ -313,6 +315,7 @@ public class GameSession : MonoBehaviour
         {
             m_LocalPlayer.State = InGamePlayerModel.InGameState.Done;
             HUD.InGamePlayerList.ForcePlayerViewUpdate(m_LocalPlayer.UserId);
+            m_PlayerCardId = cardId;
         }
         return true;
     }
