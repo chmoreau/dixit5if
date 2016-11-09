@@ -10,6 +10,8 @@ public class GameSessionService : MonoBehaviour
 {
     [SerializeField]
     private Animator m_CameraAnimator = null;
+    [SerializeField]
+    private Animator m_MenuAnimator = null;
     [Header("Test")]
     public string SessionId = null;
     public InGamePlayerModel LocalPlayer = null;
@@ -156,6 +158,7 @@ public class GameSessionService : MonoBehaviour
     {
         if (m_CurrentGameSession == null) { return; }
         StartCoroutine(EndSessionCoroutine());
+        m_MenuAnimator.SetTrigger("toMainMenu");
     }
 
     private IEnumerator EndSessionCoroutine()

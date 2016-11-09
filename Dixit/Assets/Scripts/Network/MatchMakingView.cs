@@ -69,7 +69,6 @@ public class MatchMakingView : MonoBehaviour
         GameObject go = GameObject.Find("NetworkService");
         Network network = (Network)go.GetComponent(typeof(Network));
         network.Disconnect();
-        m_MenuAnimator.SetTrigger("toMainMenu");
         StopCoroutine(m_TickCoroutine);
         m_TickCoroutine = null;
     }
