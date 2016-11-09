@@ -144,6 +144,9 @@ public class Network : MonoBehaviour
             first_turn = false;
         } else
         {
+            // global variables not reinitialized Razvan :|
+            cnt = 0;
+            dict.Clear();
             GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.DrawHand, (object)cards.ToArray());
             GameSessionService.CurrentGameSession.TranslateToPhase(GameSession.Phase.ChooseTheme, (object)narrator);
         }
