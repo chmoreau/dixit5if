@@ -253,7 +253,7 @@ function calculteScores(turn) {
                 // narrator succeed
                 playerTrick.score += 3;
             } else {
-                if (playerTrick.score.cardPicked == narratorCard) {
+                if (playerTrick.cardPicked == narratorCard) {
                     playerTrick.score += 3;
                 }
             }
