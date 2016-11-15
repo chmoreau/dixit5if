@@ -90,7 +90,6 @@ Game.prototype.newTurn = function (ioPlayers) {
         console.log('player ' + playerID + ' played the card ' + cardID);
         match.players.find(function (player, index, array) {
             if (player.id === playerID) {
-                var j = 0;
                 // remove card from player's hand
                 player.hand = player.hand.filter(function (card) {
                     if (card == cardID) {
@@ -98,9 +97,14 @@ Game.prototype.newTurn = function (ioPlayers) {
                     }
                     return true;
                 });
-                var playerTrick = { playerID: playerID, cardPlayed: cardID, score: 0 };
-                trick.push(playerTrick);
-                ioPlayers.sendToAll(Messages.CARD_PLAYED, { playerID: playerID });
+                var previousPick = trick.find(function (el) {
+                    return el.playerID === playerID;
+                })
+                if (previousPick === undefined) {
+                    var playerTrick = { playerID: playerID, cardPlayed: cardID, score: 0 };
+                    trick.push(playerTrick);
+                    ioPlayers.sendToAll(Messages.CARD_PLAYED, { playerID: playerID });
+                }
             };
         });
         /** REVEAL CARD */
@@ -112,10 +116,10 @@ Game.prototype.newTurn = function (ioPlayers) {
             cards = cards.sort(function () { return 0.5 - Math.random() });
             var i = 0;
             var reveal = '';
-            for(i = 0; i < cards.length; ++i ) {
+            for (i = 0; i < cards.length; ++i) {
                 reveal = reveal + cards[i] + ',';
             }
-            if(i === cards.length) {
+            if (i === cards.length) {
                 ioPlayers.sendToAll(Messages.REVEAL_CARDS, { cards: reveal });
             }
         }
@@ -147,34 +151,34 @@ Game.prototype.newTurn = function (ioPlayers) {
                 console.log("scores of the turn calculated");
                 /**TRICK */
 
-                match.turn.trick.forEach(function(element) {
+                match.turn.trick.forEach(function (element) {
                     ioPlayers.sendToAll(Messages.TRICK, element);
                 });
-             //   ioPlayers.sendToAll(Messages.TRICK, { trick: match.turn.trick });
+                //   ioPlayers.sendToAll(Messages.TRICK, { trick: match.turn.trick });
                 updatePlayersScores(match);
                 console.log("players' scores updated");
                 var scores = getScores(match.players);
                 var aux = 0;
                 if (match.stack.length < match.players.length && match.players[0].hand.length === 0) {
                     /**GAME_OVER */
-                    scores.forEach(function(Element) {
-                        ioPlayers.sendToAll(Messages.GAME_OVER,  Element );
+                    scores.forEach(function (Element) {
+                        ioPlayers.sendToAll(Messages.GAME_OVER, Element);
 
                     });
-                    
+
                 } else {
                     /**NEW_TURN */
-                     scores.forEach(function(Element) {
-                        ioPlayers.sendToAll(Messages.NEW_TURN,  Element );
+                    scores.forEach(function (Element) {
+                        ioPlayers.sendToAll(Messages.NEW_TURN, Element);
                     });
-                    ioPlayers.receiveMsg(Messages.READY_FOR_NEXT, function() {
+                    ioPlayers.receiveMsg(Messages.READY_FOR_NEXT, function () {
                         aux++;
                         console.log(aux + " " + match.players.length);
-                        if(aux == match.players.length) {
+                        if (aux == match.players.length) {
                             game.newTurn(ioPlayers);
                         }
                     });
-                 
+
                 }
 
             }
@@ -248,7 +252,7 @@ function calculteScores(turn) {
         });
         console.log("+2 for everyone");
     } else {
-         trick.forEach(function (playerTrick, index, array) {
+        trick.forEach(function (playerTrick, index, array) {
             if (playerTrick.playerID == narratorID) {
                 // narrator succeed
                 playerTrick.score += 3;
@@ -257,7 +261,7 @@ function calculteScores(turn) {
                     playerTrick.score += 3;
                 }
             }
-         });
+        });
     }
 
     trick.forEach(function (playerTrick, index, array) {
