@@ -182,7 +182,7 @@ public class Table : MonoBehaviour {
         CardSlot slot = AllocateSlot();
         if (slot)
         {
-            slot.Card = GameSessionService.CurrentGameSession.InstantiateCard(null, playerId, slot.FaceDownAnchor);
+            slot.Card = GameSessionService.CurrentGameSession.InstantiateCard(null, null, slot.FaceDownAnchor); // playerId
             slot.Card.transform.SetParent(slot.transform);
         }
     }
@@ -276,6 +276,7 @@ public class Table : MonoBehaviour {
 
     private void PickCard()
     {
+        if (GameSessionService.CurrentGameSession.LocalPlayer.UserId == m_CardSlots[m_SelectedCardIndex].Card.OwnerId) { return; }
         //Register card play to game server
         if (!GameSessionService.CurrentGameSession.PickCard(m_CardSlots[m_SelectedCardIndex].Card.CardId)) { return; }
 

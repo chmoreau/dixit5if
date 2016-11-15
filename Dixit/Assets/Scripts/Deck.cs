@@ -24,7 +24,7 @@ public class Deck : MonoBehaviour {
 
 	public void DrawCard(string cardId, CardSlot cardSlot)
     {
-        Card card = FetchAndInstantiateCard(cardId, GameSessionService.CurrentGameSession.LocalPlayer.UserId, m_CardSpawnPoint);
+        Card card = FetchAndInstantiateCard(cardId, null, m_CardSpawnPoint); // GameSessionService.CurrentGameSession.LocalPlayer.UserId
         TransformAnimation.AnimationCallback onDrawStart = () => 
         {
             cardSlot.Card = card;
