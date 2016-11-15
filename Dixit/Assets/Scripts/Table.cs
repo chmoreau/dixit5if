@@ -164,6 +164,7 @@ public class Table : MonoBehaviour {
         {
             m_ThemeInputPanel.SetActive(false);
             SetTheme(theme);
+            m_ThemeInputPanel.GetComponentInChildren<InputField>().text = string.Empty;
         }
     }
 

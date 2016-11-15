@@ -309,6 +309,7 @@ public class GameSession : MonoBehaviour
     public bool PlayCard(string cardId)
     {
         if (m_CurrentPhase != Phase.PlayCard) { return false; }
+        if (m_LocalPlayer.State == InGamePlayerModel.InGameState.Done) { return false; }
         //network api
         FindObjectOfType<Network>().PlayCard(cardId);
         if (true)
@@ -332,6 +333,7 @@ public class GameSession : MonoBehaviour
     public bool PickCard(string cardId)
     {
         if (m_CurrentPhase != Phase.PickCard) { return false; }
+        if (m_LocalPlayer.State == InGamePlayerModel.InGameState.Done) { return false; }
         //network api
         FindObjectOfType<Network>().PickCard(cardId);
         if (true)
