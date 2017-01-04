@@ -4,9 +4,20 @@ node_modules
 
 # VS Code
 *.DB
+<<<<<<< HEAD
 *.csproj
 *.sln
 
 # Unity
 Library/
 Temp/
+=======
+
+# Unity
+Dixit/Library
+Dixit/Temp
+
+# VS C# Project
+*.csproj
+*.sln
+>>>>>>> unity

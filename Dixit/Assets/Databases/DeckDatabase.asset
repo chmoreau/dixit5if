@@ -1,0 +1,92 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e62f85601dbfbf24da0f270c528f90bc, type: 3}
+  m_Name: DeckDatabase
+  m_EditorClassIdentifier: 
+  m_DefaultCard:
+    m_CardId: default
+    m_CardImage: {fileID: 2800000, guid: 269af002511dd754eb58663a8efa7174, type: 3}
+  m_AllCards:
+  - m_CardId: 1
+    m_CardImage: {fileID: 2800000, guid: 7dfd4d98261294c488177a05f94ccf4f, type: 3}
+  - m_CardId: 2
+    m_CardImage: {fileID: 2800000, guid: 31054c6bec2b48f4c9da96f2d2f73264, type: 3}
+  - m_CardId: 3
+    m_CardImage: {fileID: 2800000, guid: f43c28f88da05b44cbb24b8d4eb12cb8, type: 3}
+  - m_CardId: 4
+    m_CardImage: {fileID: 2800000, guid: a34ec11eee4164d4bb0c72b778e1dc42, type: 3}
+  - m_CardId: 5
+    m_CardImage: {fileID: 2800000, guid: f82fa7be452ea8142bd084686cced9d1, type: 3}
+  - m_CardId: 6
+    m_CardImage: {fileID: 2800000, guid: 850718b7f0fd71c40a792a10c10aee36, type: 3}
+  - m_CardId: 7
+    m_CardImage: {fileID: 2800000, guid: 05359ce5586586148a6601603efc97ba, type: 3}
+  - m_CardId: 8
+    m_CardImage: {fileID: 2800000, guid: 73d83d532b173f440a421907028f2832, type: 3}
+  - m_CardId: 9
+    m_CardImage: {fileID: 2800000, guid: d1023f3f327c5fd4b8d30dbc89c33293, type: 3}
+  - m_CardId: 10
+    m_CardImage: {fileID: 2800000, guid: f28a08bfc5e373547a705467b2a28030, type: 3}
+  - m_CardId: 11
+    m_CardImage: {fileID: 2800000, guid: 2d183e2009fc820438cf99087f83bce1, type: 3}
+  - m_CardId: 12
+    m_CardImage: {fileID: 2800000, guid: 17f3f5d89d9739e45b079b4c1be1a913, type: 3}
+  - m_CardId: 13
+    m_CardImage: {fileID: 2800000, guid: e92945b92e0cc7f40b9260acbe9f8961, type: 3}
+  - m_CardId: 14
+    m_CardImage: {fileID: 2800000, guid: 31f8f0856049cf54ea7257d7001c4df1, type: 3}
+  - m_CardId: 15
+    m_CardImage: {fileID: 2800000, guid: db99babe70fa36b429db2fcbf98ad33c, type: 3}
+  - m_CardId: 16
+    m_CardImage: {fileID: 2800000, guid: ea65ac4765eb44b44acabb3bc2f5c434, type: 3}
+  - m_CardId: 17
+    m_CardImage: {fileID: 2800000, guid: 146c1fd388d132849913bdf66bc264b2, type: 3}
+  - m_CardId: 18
+    m_CardImage: {fileID: 2800000, guid: 81ebdad4f904b3542b4fc61e8f727fe3, type: 3}
+  - m_CardId: 19
+    m_CardImage: {fileID: 2800000, guid: a2cfa277ff51e6948a5979afd1b47573, type: 3}
+  - m_CardId: 20
+    m_CardImage: {fileID: 2800000, guid: bbf72cd4f8cc14d44ae7898a38c76621, type: 3}
+  - m_CardId: 21
+    m_CardImage: {fileID: 2800000, guid: 80d632e4d423bab4eb4f2ca6e2c8c281, type: 3}
+  - m_CardId: 22
+    m_CardImage: {fileID: 2800000, guid: 0a6e6f584bb9eee4a99a4bc27dbf387d, type: 3}
+  - m_CardId: 23
+    m_CardImage: {fileID: 2800000, guid: c01b66d434a8de84eb16387862781dbb, type: 3}
+  - m_CardId: 24
+    m_CardImage: {fileID: 2800000, guid: 382ea8fcbe9a3e24da9ee86b8f2dcc49, type: 3}
+  - m_CardId: 25
+    m_CardImage: {fileID: 2800000, guid: 0b53e2269fecb6e42974a29bee4b7e2c, type: 3}
+  - m_CardId: 26
+    m_CardImage: {fileID: 2800000, guid: d9252f533c806a846af4e5bd867a40db, type: 3}
+  - m_CardId: 27
+    m_CardImage: {fileID: 2800000, guid: 7e9a26d867e99cf4c93c816b7dc007a7, type: 3}
+  - m_CardId: 28
+    m_CardImage: {fileID: 2800000, guid: beae3b2b5dc664e438eecff03e362f8d, type: 3}
+  - m_CardId: 29
+    m_CardImage: {fileID: 2800000, guid: fffe3289073ec1b479dde6492cc0667a, type: 3}
+  - m_CardId: 30
+    m_CardImage: {fileID: 2800000, guid: 31f25e858c99a7249a5fd2bccec1515d, type: 3}
+  - m_CardId: 31
+    m_CardImage: {fileID: 2800000, guid: 409d0b4b005e782479a17335729d4483, type: 3}
+  - m_CardId: 32
+    m_CardImage: {fileID: 2800000, guid: 15d3562b2a2149747bd96a5ed3914a89, type: 3}
+  - m_CardId: 33
+    m_CardImage: {fileID: 2800000, guid: 12aa24469ff1a0c4fba1adfdd3713f48, type: 3}
+  - m_CardId: 34
+    m_CardImage: {fileID: 2800000, guid: 0348fb0bca450f3458b4fadc214c743c, type: 3}
+  - m_CardId: 35
+    m_CardImage: {fileID: 2800000, guid: 2cd1939c2d3bd4b4a8d8f58a7506fb8d, type: 3}
+  - m_CardId: 36
+    m_CardImage: {fileID: 2800000, guid: 3163859c26397934e9820e598b55369b, type: 3}
+  m_DeckList:
+  - m_DeckId: Deck1
+    m_CardIds: []
