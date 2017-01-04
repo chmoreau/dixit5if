@@ -4,3 +4,9 @@ node_modules
 
 # VS Code
 *.DB
+*.csproj
+*.sln
+
+# Unity
+Library/
+Temp/
